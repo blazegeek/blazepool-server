@@ -7,12 +7,12 @@
 // Import Required Modules
 var fs = require('fs');
 var async = require('async');
-var util = require('stratum-pool/scripts/util.js');
+var util = require('blazepool-stratum-pool/scripts/util.js');
 var redis = require('redis');
 var RedisClustr = require('redis-clustr');
 
 // Import Stratum Module
-var Stratum = require('stratum-pool');
+var Stratum = require('blazepool-stratum-pool');
 
 // Derive Main Address from Given
 function getProperAddress(poolOptions, address) {
