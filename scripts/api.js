@@ -12,21 +12,21 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
 
     // Establish API Variables
     var portalStats = new PoolStats(logger, poolConfigs, portalConfig);
-    this.stats = portalStats
+    this.stats = portalStats;
     this.liveStatConnections = {};
 
     // Manage API Error Messages
     const messages = {
         invalid: "The server was unable to handle your request. Verify your input and try again.",
         parameters: "Your request is missing parameters. Verify your input and try again."
-    }
+    };
 
     // Collect Current Blocks Data
     function getBlocksData(portalStats, pool, address) {
 
         // Establish Block Variables
-        var blocks = []
-        var statistics = {}
+        var blocks = [];
+        var statistics = {};
 
         // Get Pending Block Information
         for (var w in portalStats.stats[pool].blocks.pending) {
@@ -46,7 +46,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                 soloMined: blockInformation.soloMined,
                 confirmed: false,
                 confirmations: blockConfirms[blockInformation.blockHash] || 1,
-            }
+            };
             blocks.push(blocksData);
         }
 
@@ -67,12 +67,12 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                 soloMined: blockInformation.soloMined,
                 confirmed: true,
                 confirmations: 100,
-            }
+            };
             blocks.push(blocksData);
         }
 
         // Filter by Worker Passed
-        if (address != null && address.length > 0) {
+        if (address !== null && address.length > 0) {
             blocks = blocks.filter(function(block) {
                 return block.worker === address;
             });
@@ -80,38 +80,38 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
 
         // Calculate Blocks Found in Last "X" Hours/Days
         const lastHour = blocks.filter(function(block) {
-            var currentDate = new Date()
+            var currentDate = new Date();
             return block.time > currentDate.setHours(currentDate.getHours() - 1);
-        }).length
+        }).length;
         const last24Hours = blocks.filter(function(block) {
-            var currentDate = new Date()
+            var currentDate = new Date();
             return block.time > currentDate.setDate(currentDate.getDate() - 1);
-        }).length
+        }).length;
         const last7Days = blocks.filter(function(block) {
-            var currentDate = new Date()
+            var currentDate = new Date();
             return block.time > currentDate.setDate(currentDate.getDate() - 7);
-        }).length
+        }).length;
 
         // Append to Block Statistics
-        statistics.lastHour = lastHour
-        statistics.last24Hours = last24Hours
-        statistics.last7Days = last7Days
+        statistics.lastHour = lastHour;
+        statistics.last24Hours = last24Hours;
+        statistics.last7Days = last7Days;
 
         // Define Output Payload
         const payload = {
             blocks: blocks,
             statistics: statistics,
-        }
+        };
 
         // Return Output
-        return payload
+        return payload;
     }
 
     // Collect Current Payments Data
     function getPaymentsData(portalStats, pool, address) {
 
         // Establish Payment Variables
-        var payments = []
+        var payments = [];
 
         for (var w in portalStats.stats[pool].payments) {
             var paymentInformation = portalStats.stats[pool].payments[w];
@@ -127,12 +127,12 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                 unpaid: paymentInformation.unpaid,
                 records: paymentInformation.records,
                 totals: paymentInformation.totals,
-            }
+            };
             payments.push(paymentsData);
         }
 
         // Filter by Worker Passed
-        if (address != null && address.length > 0) {
+        if (address !== null && address.length > 0) {
             payments = payments.filter(function(payment) {
                 return Object.keys(payment.totals.amounts).includes(address);
             });
@@ -141,17 +141,17 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
         // Define Output Payload
         const payload = {
             payments: payments,
-        }
+        };
 
         // Return Output
-        return payload
+        return payload;
     }
 
     // Collect Current Workers Data
     function getWorkersData(portalStats, pool, address) {
 
         // Establish Worker Variables
-        var workers = []
+        var workers = [];
 
         // Get Shared Worker Information
         for (var w in portalStats.stats[pool].workers.workersShared) {
@@ -167,7 +167,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                 hashrate: workerInformation.hashrate,
                 hashrateType: workerInformation.hashrateType,
                 soloMining: workerInformation.soloMining,
-            }
+            };
             workers.push(workersData);
         }
 
@@ -185,12 +185,12 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                 hashrate: workerInformation.hashrate,
                 hashrateType: workerInformation.hashrateType,
                 soloMining: workerInformation.soloMining,
-            }
+            };
             workers.push(workersData);
         }
 
         // Filter by Worker Passed
-        if (address != null && address.length > 0) {
+        if (address !== null && address.length > 0) {
             workers = workers.filter(function(worker) {
                 return worker.address === address;
             });
@@ -199,10 +199,10 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
         // Define Output Payload
         const payload = {
             workers: workers,
-        }
+        };
 
         // Return Output
-        return payload
+        return payload;
     }
 
     // Handle API Requests
@@ -219,14 +219,14 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     var workerQuery = urlQueries.worker || null;
 
                     // Define Individual Variables
-                    var blocks = {}
+                    var blocks = {};
 
                     // Get Block Information
                     for (var pool in portalStats.stats) {
-                        var formattedPool = (poolQuery != null ? poolQuery.toLowerCase() : null)
-                        var currentPool = portalStats.stats[pool].name.toLowerCase()
+                        var formattedPool = (poolQuery !== null ? poolQuery.toLowerCase() : null);
+                        var currentPool = portalStats.stats[pool].name.toLowerCase();
                         if ((formattedPool === null) || (formattedPool === currentPool)) {
-                            var blocksData = getBlocksData(portalStats, pool, workerQuery)
+                            var blocksData = getBlocksData(portalStats, pool, workerQuery);
                             if (blocksData.blocks.length >= 1) {
                                 blocks[portalStats.stats[pool].name] = blocksData.blocks;
                             }
@@ -238,7 +238,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                         endpoint: "blocks",
                         errors: "",
                         data: blocks,
-                    }
+                    };
 
                     // Finalize Endpoint Information
                     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -252,9 +252,9 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     // Finalize Payload
                     var payload = {
                         endpoint: "blocks",
-                        errors: messages["invalid"],
+                        errors: messages.invalid,
                         data: {},
-                    }
+                    };
 
                     // Finalize Endpoint Information
                     res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -272,17 +272,17 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     var poolQuery = urlQueries.pool || null;
 
                     // Define Individual Variables
-                    var pools = {}
-                    var partners = {}
+                    var pools = {};
+                    var partners = {};
 
                     // Get Pool Information
                     for (var pool in portalStats.stats) {
-                        var formattedPool = (poolQuery != null ? poolQuery.toLowerCase() : null)
-                        var currentPool = portalStats.stats[pool].name.toLowerCase()
+                        var formattedPool = (poolQuery !== null ? poolQuery.toLowerCase() : null);
+                        var currentPool = portalStats.stats[pool].name.toLowerCase();
                         if ((formattedPool === null) || (formattedPool === currentPool)) {
-                            const blocksData = getBlocksData(portalStats, pool, null)
-                            const paymentsData = getPaymentsData(portalStats, pool, null)
-                            const workersData = getWorkersData(portalStats, pool, null)
+                            const blocksData = getBlocksData(portalStats, pool, null);
+                            const paymentsData = getPaymentsData(portalStats, pool, null);
+                            const workersData = getWorkersData(portalStats, pool, null);
                             var poolsData = {
                                 pool: portalStats.stats[pool].name,
                                 symbol: portalStats.stats[pool].symbol,
@@ -316,7 +316,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                                     }
                                 },
                                 workers: workersData.workers,
-                            }
+                            };
                             pools[pool] = poolsData;
                         }
                     }
@@ -331,14 +331,14 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     var combined = {
                         partners: partners,
                         pools: pools
-                    }
+                    };
 
                     // Finalize Payload
                     var payload = {
                         endpoint: "combined",
                         errors: "",
                         data: combined,
-                    }
+                    };
 
                     // Finalize Endpoint Information
                     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -352,9 +352,9 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     // Finalize Payload
                     var payload = {
                         endpoint: "combined",
-                        errors: messages["invalid"],
+                        errors: messages.invalid,
                         data: {},
-                    }
+                    };
 
                     // Finalize Endpoint Information
                     res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -372,12 +372,12 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     var poolQuery = urlQueries.pool || null;
 
                     // Define Individual Variables
-                    var history = {}
+                    var history = {};
 
                     // Get Block Information
                     for (var pool in portalStats.stats) {
-                        var formattedPool = (poolQuery != null ? poolQuery.toLowerCase() : null)
-                        var currentPool = portalStats.stats[pool].name.toLowerCase()
+                        var formattedPool = (poolQuery !== null ? poolQuery.toLowerCase() : null);
+                        var currentPool = portalStats.stats[pool].name.toLowerCase();
                         if ((formattedPool === null) || (formattedPool === currentPool)) {
                             history[portalStats.stats[pool].name] = portalStats.stats[pool].history;
                         }
@@ -388,7 +388,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                         endpoint: "history",
                         errors: "",
                         data: history,
-                    }
+                    };
 
                     // Finalize Endpoint Information
                     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -402,9 +402,9 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     // Finalize Payload
                     var payload = {
                         endpoint: "history",
-                        errors: messages["invalid"],
+                        errors: messages.invalid,
                         data: {},
-                    }
+                    };
 
                     // Finalize Endpoint Information
                     res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -421,7 +421,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     var urlQueries = req.query;
 
                     // Define Individual Variables
-                    var partners = {}
+                    var partners = {};
 
                     // Get Partner Information
                     for (var partner in partnerConfigs) {
@@ -434,7 +434,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                         endpoint: "partners",
                         errors: "",
                         data: partners,
-                    }
+                    };
 
                     // Finalize Endpoint Information
                     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -448,9 +448,9 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     // Finalize Payload
                     var payload = {
                         endpoint: "partners",
-                        errors: messages["invalid"],
+                        errors: messages.invalid,
                         data: {},
-                    }
+                    };
 
                     // Finalize Endpoint Information
                     res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -469,14 +469,14 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     var workerQuery = urlQueries.worker || null;
 
                     // Define Individual Variables
-                    var payments = {}
+                    var payments = {};
 
                     // Get Block Information
                     for (var pool in portalStats.stats) {
-                        var formattedPool = (poolQuery != null ? poolQuery.toLowerCase() : null)
-                        var currentPool = portalStats.stats[pool].name.toLowerCase()
+                        var formattedPool = (poolQuery !== null ? poolQuery.toLowerCase() : null);
+                        var currentPool = portalStats.stats[pool].name.toLowerCase();
                         if ((formattedPool === null) || (formattedPool === currentPool)) {
-                            var paymentsData = getPaymentsData(portalStats, pool, workerQuery)
+                            var paymentsData = getPaymentsData(portalStats, pool, workerQuery);
                             if (paymentsData.payments.length >= 1) {
                                 payments[portalStats.stats[pool].name] = paymentsData.payments;
                             }
@@ -488,7 +488,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                         endpoint: "payments",
                         errors: "",
                         data: payments,
-                    }
+                    };
 
                     // Finalize Endpoint Information
                     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -502,9 +502,9 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     // Finalize Payload
                     var payload = {
                         endpoint: "payments",
-                        errors: messages["invalid"],
+                        errors: messages.invalid,
                         data: {},
-                    }
+                    };
 
                     // Finalize Endpoint Information
                     res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -522,14 +522,14 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     var poolQuery = urlQueries.pool || null;
 
                     // Define Individual Variables
-                    var statistics = {}
+                    var statistics = {};
 
                     // Get Pool Information
                     for (var pool in portalStats.stats) {
-                        var formattedPool = (poolQuery != null ? poolQuery.toLowerCase() : null)
-                        var currentPool = portalStats.stats[pool].name.toLowerCase()
+                        var formattedPool = (poolQuery !== null ? poolQuery.toLowerCase() : null);
+                        var currentPool = portalStats.stats[pool].name.toLowerCase();
                         if ((formattedPool === null) || (formattedPool === currentPool)) {
-                            const blocksData = getBlocksData(portalStats, pool, null)
+                            const blocksData = getBlocksData(portalStats, pool, null);
                             var statisticsData = {
                                 pool: portalStats.stats[pool].name,
                                 symbol: portalStats.stats[pool].symbol,
@@ -559,7 +559,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                                         workersSolo: portalStats.stats[pool].workers.workersSoloCount,
                                     }
                                 },
-                            }
+                            };
                             statistics[pool] = statisticsData;
                         }
                     }
@@ -569,7 +569,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                         endpoint: "statistics",
                         errors: "",
                         data: statistics,
-                    }
+                    };
 
                     // Finalize Endpoint Information
                     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -583,9 +583,9 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     // Finalize Payload
                     var payload = {
                         endpoint: "statistics",
-                        errors: messages["invalid"],
+                        errors: messages.invalid,
                         data: {},
-                    }
+                    };
 
                     // Finalize Endpoint Information
                     res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -601,7 +601,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     // Check to Ensure URL is Formatted Properly
                     var urlQueries = req.query;
                     var workerQuery = urlQueries.worker || null;
-                    if (workerQuery != null && workerQuery.length > 0) {
+                    if (workerQuery !== null && workerQuery.length > 0) {
 
                         // Output Balance of Address
                         portalStats.getBalanceByAddress(workerQuery, function(balances) {
@@ -617,17 +617,17 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
 
                             // Get Block Information
                             for (var pool in portalStats.stats) {
-                                var blocksData = getBlocksData(portalStats, pool, workerQuery)
+                                var blocksData = getBlocksData(portalStats, pool, workerQuery);
                                 if ((blocksData.blocks.length >= 1)) {
                                     blocks = blocksData.blocks;
                                     poolFlag = true;
                                 }
-                                var paymentsData = getPaymentsData(portalStats, pool, workerQuery)
+                                var paymentsData = getPaymentsData(portalStats, pool, workerQuery);
                                 if (paymentsData.payments.length >= 1) {
                                     payments = paymentsData.payments;
                                     poolFlag = true;
                                 }
-                                var workersData = getWorkersData(portalStats, pool, workerQuery)
+                                var workersData = getWorkersData(portalStats, pool, workerQuery);
                                 if (workersData.workers.length >= 1) {
                                     workers = workersData.workers;
                                     poolFlag = true;
@@ -657,14 +657,14 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                                 blocks: blocks,
                                 payments: payments,
                                 workers: workers,
-                            }
+                            };
 
                             // Finalize Payload
                             var payload = {
                                 endpoint: "wallets",
                                 errors: "",
                                 data: wallets,
-                            }
+                            };
 
                             // Finalize Endpoint Information
                             res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -677,9 +677,9 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                         // Finalize Payload
                         var payload = {
                             endpoint: "wallets",
-                            errors: messages["parameters"],
+                            errors: messages.parameters,
                             data: {},
-                        }
+                        };
 
                         res.writeHead(400, { 'Content-Type': 'application/json' });
                         res.end(JSON.stringify(payload));
@@ -693,9 +693,9 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     // Finalize Payload
                     var payload = {
                         endpoint: "wallets",
-                        errors: messages["invalid"],
+                        errors: messages.invalid,
                         data: {},
-                    }
+                    };
 
                     // Finalize Endpoint Information
                     res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -713,14 +713,14 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     var poolQuery = urlQueries.pool || null;
 
                     // Define Individual Variables
-                    var workers = {}
+                    var workers = {};
 
                     // Get Block Information
                     for (var pool in portalStats.stats) {
-                        var formattedPool = (poolQuery != null ? poolQuery.toLowerCase() : null)
-                        var currentPool = portalStats.stats[pool].name.toLowerCase()
+                        var formattedPool = (poolQuery !== null ? poolQuery.toLowerCase() : null);
+                        var currentPool = portalStats.stats[pool].name.toLowerCase();
                         if ((formattedPool === null) || (formattedPool === currentPool)) {
-                            var workersData = getWorkersData(portalStats, pool)
+                            var workersData = getWorkersData(portalStats, pool);
                             if (workersData.workers.length >= 1) {
                                 workers[portalStats.stats[pool].name] = workersData.workers;
                             }
@@ -732,7 +732,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                         endpoint: "workers",
                         errors: "",
                         data: workers,
-                    }
+                    };
 
                     // Finalize Endpoint Information
                     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -746,9 +746,9 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     // Finalize Payload
                     var payload = {
                         endpoint: "workers",
-                        errors: messages["invalid"],
+                        errors: messages.invalid,
                         data: {},
-                    }
+                    };
 
                     // Finalize Endpoint Information
                     res.writeHead(400, { 'Content-Type': 'application/json' });
