@@ -5,10 +5,10 @@
  */
 
 // Import Network Modules
-var apicache = require('apicache')
+var apicache = require('apicache');
 var bodyParser = require('body-parser');
 var compress = require('compression');
-var cors = require('cors')
+var cors = require('cors');
 var express = require('express');
 
 // Import Pool Functionality
@@ -38,7 +38,7 @@ var PoolServer = function (logger) {
 
     // Build Main Server
     var app = express();
-    var cache = apicache.middleware
+    var cache = apicache.middleware;
     app.use(bodyParser.json());
     app.use(cache('2 minutes'));
     app.use(compress());
@@ -65,7 +65,7 @@ var PoolServer = function (logger) {
         portalConfig.server.host  }:${  portalConfig.server.port
         } - its either in use or you do not have permission`);
     }
-}
+};
 
 // Export Pool Server
 module.exports = PoolServer;
