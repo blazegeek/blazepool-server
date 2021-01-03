@@ -24,7 +24,7 @@ function getProperAddress(poolOptions, address) {
 
 // Generate Redis Client
 function getRedisClient(portalConfig) {
-    redisConfig = portalConfig.redis;
+    var redisConfig = portalConfig.redis;
     var redisClient;
     if (redisConfig.cluster) {
         if (redisConfig.password !== "") {
@@ -91,7 +91,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
 
     // Optional Payment Variables
     var opidCount = 0;
-    var opids = []
+    var opids = [];
 
     // Mandatory Payment Variables
     var requireShielding = poolOptions.coin.requireShielding === true;
@@ -173,12 +173,12 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                         callback(true);
                     }
                     else {
-                        callback()
+                        callback();
                     }
                 }, true);
             }
             else {
-                callback()
+                callback();
             }
         }, true);
     }
@@ -206,7 +206,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
 
     // Return Main Unspent Balance
     function listUnspent (addr, notAddr, minConf, displayBool, callback) {
-        if (addr != null) {
+        if (addr !== null) {
             var args = [minConf, 99999999, [addr]];
         } else {
             addr = 'Payout wallet';
@@ -220,7 +220,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
             }
             else {
                 var balance = parseFloat(0);
-                if (result[0].response != null && result[0].response.length > 0) {
+                if (result[0].response !== null && result[0].response.length > 0) {
                     for (var i = 0, len = result[0].response.length; i < len; i++) {
                         if (result[0].response[i].address && result[0].response[i].address !== notAddr) {
                             balance += parseFloat(result[0].response[i].amount || 0);
@@ -246,7 +246,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
             }
             else {
                 var balance = parseFloat(0);
-                if (result[0].response != null) {
+                if (result[0].response !== null) {
                     balance = coinsRound(result[0].response);
                 }
                 if (displayBool) {
@@ -262,7 +262,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
         if (callback) {
             return;
         }
-        if (balance === NaN) {
+        if (isNaN(balance)) {
             logger.error(logSystem, logComponent, `Error with sending tAddress balance to zAddress, balance is NaN`);
             return;
         }
@@ -286,9 +286,9 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                 opidCount += 1;
                 opids.push(opid);
                 if (displayBool) {
-                    logger.special(logSystem, logComponent, `Balance shielded successfully: ${  amount  } ${ opid }`)
+                    logger.special(logSystem, logComponent, `Balance shielded successfully: ${  amount  } ${ opid }`);
                 }
-                callback()
+                callback();
             }
         });
     }
@@ -298,7 +298,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
         if (callback) {
             return;
         }
-        if (balance === NaN) {
+        if (isNaN(balance)) {
             logger.error(logSystem, logComponent, `Error with sending zAddress balance to tAddress, balance is NaN`);
             return;
         }
@@ -325,9 +325,9 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                 opidCount += 1;
                 opids.push(opid);
                 if (displayBool) {
-                    logger.special(logSystem, logComponent, `Balance unshielded successfully: ${  amount  } ${ opid }`)
+                    logger.special(logSystem, logComponent, `Balance unshielded successfully: ${  amount  } ${ opid }`);
                 }
-                callback()
+                callback();
             }
         });
     }
@@ -337,7 +337,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
         var batchRPCCommand = [];
         if ((ops.length === 0) && (opidCount !== 0)) {
             opicCount = 0;
-            opids = []
+            opids = [];
             logger.warning(logSystem, logComponent, 'Clearing operation ids due to empty result set.');
         }
         ops.forEach(function(op, i) {
@@ -370,7 +370,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
         daemon.batchCmd(batchRPCCommand, function(error, results) {
             if (error || !results) {
                 logger.error(logSystem, logComponent, `Error with RPC call z_getoperationresult ${  JSON.stringify(error)}`);
-                return
+                return;
             }
             results.forEach(function(result, i) {
                 if (result.result[i] && parseFloat(result.result[i].execution_secs || 0) > poolOptions.shieldInterval * 1000) {
@@ -386,7 +386,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
             if (result.error) {
                 if (opidCount !== 0) {
                     opidCount = 0;
-                    opids = []
+                    opids = [];
                 }
                 logger.error(logSystem, logComponent, `Error with RPC call z_getoperationstatus ${  JSON.stringify(result.error)}`);
             }
@@ -396,7 +396,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
             else {
                 if (opidCount !== 0) {
                     opidCount = 0;
-                    opids = []
+                    opids = [];
                 }
                 logger.error(logSystem, logComponent, `Error with RPC call z_getoperationstatus`);
             }
@@ -427,13 +427,13 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                 validateAddress(poolOptions.addresses.zAddress, 'z_validateaddress', callback);
             }
             else {
-                callback()
+                callback();
             }
         },
 
         // Validate Main Balance
         function(callback) {
-            getBalance(callback)
+            getBalance(callback);
         }
 
     ], function(error) {
@@ -455,7 +455,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
 
         // Process Operation Checks
         if (poolOptions.operationInterval) {
-            operationInterval = setInterval(function() {
+            var operationInterval = setInterval(function() {
                 try {
                     checkOperations();
                 }
@@ -487,7 +487,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                             listUnspent(poolOptions.addresses.address, null, minConfPayout, false, sendCoinsToZ);
                             break;
                         default:
-                            listUnspentZ(poolOptions.addresses.zAddress, minConfPayout, false, sendCoinsToT)
+                            listUnspentZ(poolOptions.addresses.zAddress, minConfPayout, false, sendCoinsToT);
                             shieldIntervalState = 0;
                             break;
                     }
@@ -501,7 +501,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
         // Finalize Setup
         var lastInterval = Date.now();
         setTimeout(function() {
-            processPayments("start", lastInterval)
+            processPayments("start", lastInterval);
         }, 100);
         setupFinished(true);
 
@@ -667,7 +667,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                         var generationTx = tx.result.details.filter(function(tx) {
                             var generationAddress = tx.address;
                             if (generationAddress.indexOf(':') > -1) {
-                                generationAddress = generationAddress.split(':')[1]
+                                generationAddress = generationAddress.split(':')[1];
                             }
                             return generationAddress === poolOptions.addresses.address;
                         })[0];
@@ -691,10 +691,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                     var canDeleteShares = function(r) {
                         for (var i = 0; i < rounds.length; i++) {
                             var compareR = rounds[i];
-                            if ((compareR.height === r.height)
-                                && (compareR.category !== 'kicked')
-                                && (compareR.category !== 'orphan')
-                                && (compareR.serialized !== r.serialized)) {
+                            if ((compareR.height === r.height) && (compareR.category !== 'kicked') && (compareR.category !== 'orphan') && (compareR.serialized !== r.serialized)) {
                                 return false;
                             }
                         }
@@ -726,12 +723,12 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
 
                 // Lookup Times from Rounds
                 var timeLookups = rounds.map(function(r) {
-                    return ['hgetall', `${coin  }:times:times${  r.height}`]
+                    return ['hgetall', `${coin  }:times:times${  r.height}`];
                 });
 
                 // Lookup Shares from Rounds
                 var shareLookups = rounds.map(function(r) {
-                    return ['hgetall', `${coin  }:shares:round${  r.height}`]
+                    return ['hgetall', `${coin  }:shares:round${  r.height}`];
                 });
 
                 // Establish Times Lookup
@@ -741,19 +738,19 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                         return;
                     }
 
-                    var allWorkerTimesShared = []
+                    var allWorkerTimesShared = [];
                     timesResults.forEach(function(round) {
                         var roundTimesShared = {};
                         try {
                             // Format Shared Time Data
                             Object.keys(round).forEach(function(entry) {
-                                roundTimesShared[entry] = parseFloat(round[entry])
+                                roundTimesShared[entry] = parseFloat(round[entry]);
                             });
                         }
                         catch(error) {
                             logger.error(logSystem, logComponent, 'Check finished - redis error with formatting round times.');
                         }
-                        allWorkerTimesShared.push(roundTimesShared)
+                        allWorkerTimesShared.push(roundTimesShared);
                     });
 
                     // Establish Shares Lookup
@@ -763,29 +760,29 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                             return;
                         }
 
-                        var allWorkerSharesSolo = []
-                        var allWorkerSharesShared = []
+                        var allWorkerSharesSolo = [];
+                        var allWorkerSharesShared = [];
                         sharesResults.forEach(function(round) {
-                            var roundSharesSolo = {}
-                            var roundSharesShared = {}
+                            var roundSharesSolo = {};
+                            var roundSharesShared = {};
                             try {
                                 // Format Shared/Solo Shares Data
                                 Object.keys(round).forEach(function(entry) {
                                     var details = JSON.parse(entry);
                                     if (details.soloMined) {
                                         if (!(details.worker in roundSharesSolo)) {
-                                            roundSharesSolo[details.worker] = parseFloat(round[entry])
+                                            roundSharesSolo[details.worker] = parseFloat(round[entry]);
                                         }
                                         else {
-                                            roundSharesSolo[details.worker] += parseFloat(round[entry])
+                                            roundSharesSolo[details.worker] += parseFloat(round[entry]);
                                         }
                                     }
                                     else {
                                         if (!(details.worker in roundSharesShared)) {
-                                            roundSharesShared[details.worker] = parseFloat(round[entry])
+                                            roundSharesShared[details.worker] = parseFloat(round[entry]);
                                         }
                                         else {
-                                            roundSharesShared[details.worker] += parseFloat(round[entry])
+                                            roundSharesShared[details.worker] += parseFloat(round[entry]);
                                         }
                                     }
                                 });
@@ -793,8 +790,8 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                             catch(e) {
                                 logger.error(logSystem, logComponent, 'Check finished - redis error with formatting round shares.');
                             }
-                            allWorkerSharesSolo.push(roundSharesSolo)
-                            allWorkerSharesShared.push(roundSharesShared)
+                            allWorkerSharesSolo.push(roundSharesSolo);
+                            allWorkerSharesShared.push(roundSharesShared);
                         });
 
                         var errors = null;
@@ -851,7 +848,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                             rounds.forEach(function(round, i) {
                                 var workerSharesSolo = allWorkerSharesSolo[i];
                                 var workerSharesShared = allWorkerSharesShared[i];
-                                var workerTimesShared = allWorkerTimesShared[i]
+                                var workerTimesShared = allWorkerTimesShared[i];
 
                                 // Check if Shares Exist in Round
                                 if ((Object.keys(workerSharesSolo).length <= 0) && (Object.keys(workerSharesShared).length <= 0)) {
@@ -915,7 +912,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                                                 var shares = parseFloat((workerSharesShared[workerAddress] || 0));
                                                 if (maxTime > 0) {
                                                     var lost = parseFloat(0);
-                                                    if (workerTimes[workerAddress] != null && parseFloat(workerTimes[workerAddress]) > 0) {
+                                                    if (workerTimes[workerAddress] !== null && parseFloat(workerTimes[workerAddress]) > 0) {
                                                         var timePeriod = roundTo(parseFloat(workerTimes[workerAddress] || 1) / maxTime , 2);
                                                         if (timePeriod > 0 && timePeriod < 0.51) {
                                                             var lost = shares - (shares * timePeriod);
@@ -947,12 +944,12 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                                             var worker = workers[round.workerAddress] = (workers[round.workerAddress] || {});
                                             var shares = parseFloat((workerSharesSolo[round.workerAddress] || 0));
                                             var workerRewardTotal = Math.round(reward);
-                                            worker.records = workers[round.workerAddress].records || {}
+                                            worker.records = workers[round.workerAddress].records || {};
                                             worker.records[round.height] = {
                                                 amounts: satoshisToCoins(workerRewardTotal),
                                                 shares: shares,
                                                 times: 1,
-                                            }
+                                            };
                                             worker.roundShares = shares;
                                             worker.totalShares = parseFloat(worker.totalShares || 0) + shares;
                                             worker.reward = (worker.reward || 0) + workerRewardTotal;
@@ -963,15 +960,15 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                                             for (var workerAddress in workerSharesShared) {
                                                 var worker = workers[workerAddress] = (workers[workerAddress] || {});
                                                 var shares = parseFloat((workerSharesShared[workerAddress] || 0));
-                                                worker.records = workers[workerAddress].records || {}
+                                                worker.records = workers[workerAddress].records || {};
                                                 worker.records[round.height] = {
                                                     amounts: 0,
                                                     shares: shares,
                                                     times: 0,
-                                                }
+                                                };
                                                 if (maxTime > 0) {
                                                     var lost = parseFloat(0);
-                                                    if (workerTimes[workerAddress] != null && parseFloat(workerTimes[workerAddress]) > 0) {
+                                                    if (workerTimes[workerAddress] !== null && parseFloat(workerTimes[workerAddress]) > 0) {
                                                         var timePeriod = roundTo(parseFloat(workerTimes[workerAddress] || 1) / maxTime , 2);
                                                         worker.records[round.height].times = timePeriod;
                                                         if (timePeriod > 0 && timePeriod < 0.51) {
@@ -1035,16 +1032,16 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                         var workerTotals = {};
                         var totalSent = 0;
                         var totalShares = 0;
-                        tries += 1
+                        tries += 1;
 
                         for (var w in workers) {
                             var worker = workers[w];
-                            totalShares += (worker.totalShares || 0)
+                            totalShares += (worker.totalShares || 0);
                             worker.balance = worker.balance || 0;
                             worker.reward = worker.reward || 0;
                             var toSendSatoshis = Math.round((worker.balance + worker.reward) * (1 - withholdPercent));
                             var address = worker.address = (worker.address || getProperAddress(poolOptions, w.split('.')[0])).trim();
-                            if (workerTotals[address] != null && workerTotals[address] > 0) {
+                            if (workerTotals[address] !== null && workerTotals[address] > 0) {
                                 workerTotals[address] += toSendSatoshis;
                             } else {
                                 workerTotals[address] = toSendSatoshis;
@@ -1061,7 +1058,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                                 totalSent += toSendSatoshis;
                                 worker.sent = satoshisToCoins(toSendSatoshis);
                                 worker.balanceChange = Math.min(worker.balance, toSendSatoshis) * -1;
-                                if (amountsRecords[address] != null && amountsRecords[address] > 0) {
+                                if (amountsRecords[address] !== null && amountsRecords[address] > 0) {
                                     amountsRecords[address] = coinsRound(amountsRecords[address] + worker.sent);
                                 } else {
                                     amountsRecords[address] = worker.sent;
@@ -1071,7 +1068,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                                 worker.sent = 0;
                                 worker.balanceChange = Math.max(toSendSatoshis - worker.balance, 0);
                                 if (worker.balanceChange > 0) {
-                                    if (unpaidRecords[address] != null && unpaidRecords[address] > 0) {
+                                    if (unpaidRecords[address] !== null && unpaidRecords[address] > 0) {
                                         unpaidRecords[address] = coinsRound(unpaidRecords[address] + satoshisToCoins(worker.balanceChange));
                                     } else {
                                         unpaidRecords[address] = satoshisToCoins(worker.balanceChange);
@@ -1080,7 +1077,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                             }
 
                             if (worker.totalShares > 0) {
-                                if (shareRecords[address] != null && shareRecords[address] > 0) {
+                                if (shareRecords[address] !== null && shareRecords[address] > 0) {
                                     shareRecords[address] += worker.totalShares;
                                 } else {
                                     shareRecords[address] = worker.totalShares;
@@ -1121,7 +1118,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                                     logger.error(logSystem, logComponent, `Error sending payments ${  JSON.stringify(result.error)}`);
                                     callback(true);
                                 }
-                                return
+                                return;
                             }
                             else if (result.error && result.error.code === -5) {
                                 logger.warning(logSystem, logComponent, rpccallTracking);
@@ -1129,7 +1126,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                                 callback(true);
                                 return;
                             }
-                            else if (result.error && result.error.message != null) {
+                            else if (result.error && result.error.message !== null) {
                                 logger.warning(logSystem, logComponent, rpccallTracking);
                                 logger.error(logSystem, logComponent, `Error sending payments ${  JSON.stringify(result.error)}`);
                                 callback(true);
@@ -1145,12 +1142,10 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                                 if (result.response) {
                                     txid = result.response;
                                 }
-                                if (txid != null) {
+                                if (txid !== null) {
                                     logger.special(logSystem, logComponent, `Sent ${  satoshisToCoins(totalSent)  } to ${  Object.keys(amountsRecords).length  } workers; txid: ${txid}`);
                                     if (withholdPercent > 0) {
-                                        logger.warning(logSystem, logComponent, `Had to withhold ${  withholdPercent * 100
-                                             }% of reward from workers to cover transaction fees. `
-                                            + `Fund pool wallet with coins to prevent this from happening`);
+                                        logger.warning(logSystem, logComponent, `Had to withhold ${ withholdPercent * 100 }% of reward from workers to cover transaction fees. ` + `Fund pool wallet with coins to prevent this from happening`);
                                     }
                                     var paymentsRecords = rounds.filter(function(round) { return round.category === 'generate'; }).map(function(round) {
                                         var roundRecords = {
@@ -1158,7 +1153,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                                             amounts: {},
                                             shares: {},
                                             times: {},
-                                        }
+                                        };
                                         for (var worker in workers) {
                                             if (typeof workers[worker].records !== "undefined") {
                                                 if (round.height in workers[worker].records) {
@@ -1264,7 +1259,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                 // Update Worker Shares
                 var moveSharesToCurrent = function(r) {
                     var workerShares = r.workerShares;
-                    if (workerShares != null) {
+                    if (workerShares !== null) {
                         logger.warning(logSystem, logComponent, `Moving shares from orphaned block ${r.height} to current round.`);
                         Object.keys(workerShares).forEach(function(worker) {
                             orphanMergeCommands.push(['hincrby', `${coin  }:shares:roundCurrent`,
@@ -1349,44 +1344,44 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
                 var fixFailedPayments = function () {
                     redisClient.zrange(`${coin}:payments:payments`, -5, -5, (err, results) => {
                         results.forEach(result => {
-                            var payment = JSON.parse(result)
+                            var payment = JSON.parse(result);
                             daemon.cmd('gettransaction', [payment.txid], result => {
-                                var transaction = result[0].response
+                                var transaction = result[0].response;
                                 if (transaction === null) {
-                                    return
+                                    return;
                                 }
 
                                 // Payment was Orphaned
                                 if (transaction.confirmations === -1) {
-                                    logger.warning(logSystem, logComponent, `Error with payment, ${payment.txid} has ${transaction.confirmations} confirmations.`)
-                                    var rpccallTracking = `sendmany "" ${  JSON.stringify(payment.amounts)}`
+                                    logger.warning(logSystem, logComponent, `Error with payment, ${payment.txid} has ${transaction.confirmations} confirmations.`);
+                                    var rpccallTracking = `sendmany "" ${  JSON.stringify(payment.amounts)}`;
                                     daemon.cmd('sendmany', ['', payment.amounts], result => {
                                         if (result.error) {
-                                            logger.warning(logSystem, logComponent, rpccallTracking)
+                                            logger.warning(logSystem, logComponent, rpccallTracking);
                                             logger.error(logSystem, logComponent, `Error sending payments ${  JSON.stringify(result.error)}`);
                                             return;
                                         }
                                         if (!result.response) {
-                                            logger.warning(logSystem, logComponent, rpccallTracking)
+                                            logger.warning(logSystem, logComponent, rpccallTracking);
                                             logger.error(logSystem, logComponent, `Error sending payments ${  JSON.stringify(result)}`);
-                                            return
+                                            return;
                                         }
-                                        logger.special(logSystem, logComponent, `Resent payment to ${Object.keys(payment.amounts).length} miners; ${payment.txid} -> ${result.response}`)
+                                        logger.special(logSystem, logComponent, `Resent payment to ${Object.keys(payment.amounts).length} miners; ${payment.txid} -> ${result.response}`);
 
                                         // Update Redis with New Payment
-                                        var oldPaymentTime = payment.time
-                                        payment.txid = result.response
-                                        payment.time = Date.now()
+                                        var oldPaymentTime = payment.time;
+                                        payment.txid = result.response;
+                                        payment.time = Date.now();
 
                                         // Push Payments to Redis
-                                        redisClient.zadd(`${coin}:payments:payments`, Date.now(), JSON.stringify(payment))
-                                        redisClient.zremrangebyscore(`${coin}:payments:payments`, oldPaymentTime, oldPaymentTime, () => {})
+                                        redisClient.zadd(`${coin}:payments:payments`, Date.now(), JSON.stringify(payment));
+                                        redisClient.zremrangebyscore(`${coin}:payments:payments`, oldPaymentTime, oldPaymentTime, () => {});
                                     }, true, true);
                                 }
-                            })
-                        })
-                    })
-                }
+                            });
+                        });
+                    });
+                };
 
                 // Check ONLY when Sending Payments
                 if (paymentMode === "payment") {
