@@ -38,9 +38,9 @@ var PoolListener = function (port) {
                 emitLog(`CLI listener failed to parse message ${  data}`);
             }
         }).listen(port, '127.0.0.1', function() {
-            emitLog(`CLI listening on port ${  port}`)
+            emitLog(`CLI listening on port ${  port}`);
         });
-    }
+    };
 };
 
 // Export Pool Listener
