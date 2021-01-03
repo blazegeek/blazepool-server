@@ -21,7 +21,7 @@ function roundTo(n, digits) {
 
 // Generate Redis Client
 function getRedisClient(portalConfig) {
-    redisConfig = portalConfig.redis;
+    var redisConfig = portalConfig.redis;
     var redisClient;
     if (redisConfig.cluster) {
         if (redisConfig.password !== "") {
@@ -99,7 +99,7 @@ var PoolShares = function (logger, poolConfig, portalConfig) {
 
     // Manage Error Endpoint
     redisClient.on('error', function(error) {
-        logger.error(logSystem, logComponent, logSubCat, `Redis client had an error: ${  JSON.stringify(error)}`)
+        logger.error(logSystem, logComponent, logSubCat, `Redis client had an error: ${  JSON.stringify(error)}`);
     });
 
     // Manage End Endpoint
@@ -158,7 +158,7 @@ var PoolShares = function (logger, poolConfig, portalConfig) {
             ['hgetall', `${coin  }:times:timesShare`],
             ['hgetall', `${coin  }:shares:roundCurrent`],
             ['hgetall', `${coin  }:times:timesCurrent`]
-        ]
+        ];
 
         // Get Current Start/Share Times
         redisClient.multi(shareLookups).exec(function(error, results) {
@@ -168,8 +168,8 @@ var PoolShares = function (logger, poolConfig, portalConfig) {
             }
 
             // Establish Current Values
-            var currentShares = results[2] || {}
-            var currentTimes = results[3] || {}
+            var currentShares = results[2] || {};
+            var currentTimes = results[3] || {};
 
             // Handle Valid Share
             if (isValidShare) {
@@ -184,14 +184,14 @@ var PoolShares = function (logger, poolConfig, portalConfig) {
                     time: dateNow,
                     worker: workerAddress,
                     soloMined: isSoloMining,
-                }
+                };
 
                 // Check Regarding Worker Join Time
                 if (!lastStartTimes[workerAddress] || !lastStartTimes[workerAddress]) {
                     lastShareTimes[workerAddress] = dateNow;
                     lastStartTimes[workerAddress] = dateNow;
                 }
-                if (lastShareTimes[workerAddress] != null && lastShareTimes[workerAddress] > 0) {
+                if (lastShareTimes[workerAddress] !== null && lastShareTimes[workerAddress] > 0) {
                     lastShareTime = lastShareTimes[workerAddress];
                     lastStartTime = lastStartTimes[workerAddress];
                 }
@@ -234,7 +234,7 @@ var PoolShares = function (logger, poolConfig, portalConfig) {
                     difficulty: difficulty,
                     worker: shareData.worker,
                     soloMined: isSoloMining,
-                }
+                };
 
                 // Handle Redis Deletions
                 redisCommands.push(['del', `${coin  }:times:timesStart`]);
@@ -245,10 +245,10 @@ var PoolShares = function (logger, poolConfig, portalConfig) {
                     redisCommands.push(['del', `${coin  }:shares:roundCurrent`]);
                     redisCommands.push(['del', `${coin  }:times:timesCurrent`]);
                     for (var share in currentShares) {
-                        redisCommands.push(['hset', `${coin  }:shares:round${  shareData.height}`, share, currentShares[share]])
+                        redisCommands.push(['hset', `${coin  }:shares:round${  shareData.height}`, share, currentShares[share]]);
                     }
                     for (var worker in currentTimes) {
-                        redisCommands.push(['hset', `${coin  }:times:times${  shareData.height}`, worker, currentTimes[worker]])
+                        redisCommands.push(['hset', `${coin  }:times:times${  shareData.height}`, worker, currentTimes[worker]]);
                     }
                 }
                 else {
@@ -257,7 +257,7 @@ var PoolShares = function (logger, poolConfig, portalConfig) {
                 }
 
                 // Handle Redis Updates
-                redisCommands.push(['sadd', `${coin  }:blocks:pending`, JSON.stringify(blockData)])
+                redisCommands.push(['sadd', `${coin  }:blocks:pending`, JSON.stringify(blockData)]);
                 redisCommands.push(['hincrby', `${coin  }:statistics:basic`, 'validBlocks', 1]);
             }
             else if (shareData.blockHash) {
@@ -265,14 +265,14 @@ var PoolShares = function (logger, poolConfig, portalConfig) {
             }
 
             // Push Hashrate Data to Database
-            var difficulty = (isValidShare ? shareData.difficulty : -shareData.difficulty)
+            var difficulty = (isValidShare ? shareData.difficulty : -shareData.difficulty);
             var hashrateData = {
                 time: dateNow,
                 difficulty: difficulty,
                 worker: shareData.worker,
                 soloMined: isSoloMining,
-            }
-            redisCommands.push(['zadd', `${coin  }:statistics:hashrate`, dateNow / 1000 | 0, JSON.stringify(hashrateData)])
+            };
+            redisCommands.push(['zadd', `${coin  }:statistics:hashrate`, dateNow / 1000 | 0, JSON.stringify(hashrateData)]);
 
             // Write Share Information to Redis Database
             redisClient.multi(redisCommands).exec(function(error, replies) {
