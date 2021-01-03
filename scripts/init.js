@@ -83,7 +83,7 @@ if (cluster.isWorker) {
 
 // Generate Redis Client
 function getRedisClient(portalConfig) {
-    redisConfig = portalConfig.redis;
+    var redisConfig = portalConfig.redis;
     var redisClient;
     if (redisConfig.cluster) {
         if (redisConfig.password !== "") {
@@ -205,7 +205,7 @@ function buildPoolConfigs() {
     });
 
     return configs;
-};
+}
 
 // Read and Combine ALL Partner Configurations
 function buildPartnerConfigs() {
@@ -214,7 +214,7 @@ function buildPartnerConfigs() {
 
     // Get FileNames of Partner Configurations
     fs.readdirSync(configDir).forEach(function(file) {
-        const currentDate = new Date()
+        const currentDate = new Date();
         if (!fs.existsSync(configDir + file) || path.extname(configDir + file) !== '.json') return;
         var partnerOptions = JSON.parse(JSON.minify(fs.readFileSync(configDir + file, {encoding: 'utf8'})));
         if (new Date(partnerOptions.subscription.endDate) < currentDate) return;
@@ -249,7 +249,7 @@ function startPoolListener() {
                 break;
         }
     }).start();
-};
+}
 
 // Functionality for Pool Payments
 function startPoolPayments() {
@@ -283,7 +283,7 @@ function startPoolPayments() {
             startPoolPayments();
         }, 2000);
     });
-};
+}
 
 function startPoolServer() {
 
@@ -301,13 +301,14 @@ function startPoolServer() {
             startPoolServer();
         }, 2000);
     });
-};
+}
 
 // Functionality for Pool Workers
 function startPoolWorkers() {
 
     // Check if Daemons Configured
     var connection;
+    var redisConfig = portalConfig.redis;
     Object.keys(poolConfigs).forEach(function(coin) {
         var p = poolConfigs[coin];
         if (!Array.isArray(p.daemons) || p.daemons.length < 1) {
@@ -383,7 +384,7 @@ function startPoolWorkers() {
         }
     }, 250);
 
-};
+}
 
 // Initialize Server
 var PoolInit = function() {
