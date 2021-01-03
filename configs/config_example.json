@@ -29,7 +29,7 @@
 			"bech32": "",
 			"bip32": {
 					"public": "0488b21e",
-					"private": "0488adef"
+					"private": "0488ade4"
 			},
 			"pubKeyHash": "26",
 			"scriptHash": "13",
