@@ -1,0 +1,116 @@
+{
+	"enabled": true,
+	"featured": true,
+	"fees": 1.0,
+	"identifier": "http://geekpool.blazegeek.com",
+	"logo": "",
+	"addresses": {
+		"address": "GJeg4QGBFeg5UFHSgnZoXtqXL5nPuGqgDn",
+		"tAddress": "",
+		"zAddress": ""
+	},
+	"coin": {
+		"name": "GeekCash",
+		"symbol": "GEEK",
+		"algorithm": "geek",
+		"peerMagic": "86c6bb8",
+		"peerMagicTestnet": "cee2caff",
+		"hasGetInfo": true,
+		"hashrateType": "hashes",
+		"overwinter": false,
+		"requireShielding": false,
+		"rewardType": "coinbasevalue",
+		"sapling": false,
+		"segwit": false,
+		"txfee": 0.00001,
+		"messagePrefix": "GeekCash Signed Message:\n",
+		"mainnet": {
+			"network": "",
+			"bech32": "",
+			"bip32": {
+					"public": "0488b21e",
+					"private": "0488adef"
+			},
+			"pubKeyHash": "26",
+			"scriptHash": "13",
+			"wif": "cc"
+		},
+		"parameters": {
+			"N": "",
+			"K": "",
+			"personalization": ""
+		},
+		"testnet": {
+			"network": "",
+			"bech32": "",
+			"bip32": {
+					"public": "043587cf",
+					"private": "04358394"
+			 },
+			"pubKeyHash": "26",
+			"scriptHash": "13",
+			"wif": "cc"
+		}
+	},
+	"daemons": [
+		{
+			"host": "127.0.0.1",
+			"port": 6888,
+			"user": "",
+			"password": ""
+		}
+	],
+	"rewards": {
+		"rewardType": "",
+		"founders": {
+			"interval": 0,
+			"reward": 0,
+			"startHeight": 0,
+			"endHeight": 0,
+			"recipients": []
+		},
+		"secureNodes": {
+			"interval": 0,
+			"reward": 0,
+			"startHeight": 0,
+			"endHeight": 0,
+			"recipients": []
+		},
+		"superNodes": {
+			"interval": 0,
+			"reward": 0,
+			"startHeight": 0,
+			"endHeight": 0,
+			"recipients": []
+		},
+		"treasury": {
+			"interval": 0,
+			"reward": 0,
+			"startHeight": 0,
+			"endHeight": 0,
+			"recipients": []
+		}
+	},
+	"paymentProcessing": {
+		"enabled": true,
+		"checkInterval": 60,
+		"operationInterval": 0,
+		"paymentInterval": 900,
+		"shieldInterval": 0,
+		"minimumPayment": 25.0,
+		"daemon": {
+			"host": "127.0.0.1",
+			"port": 6888,
+			"user": "blazegeek",
+			"password": "pool"
+		}
+	},
+	"ports": {},
+	"p2p": {
+		"enabled": true,
+		"host": "127.0.0.1",
+		"port": 6889,
+		"disableTransactions": false
+	},
+	"rewardRecipients": {}
+}
