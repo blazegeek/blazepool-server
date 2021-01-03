@@ -14,7 +14,7 @@ var Stratum = require('blazepool-stratum-pool');
 
 // Generate Redis Client
 function getRedisClient(portalConfig) {
-    redisConfig = portalConfig.redis;
+    var redisConfig = portalConfig.redis;
     var redisClient;
     if (redisConfig.cluster) {
         if (redisConfig.password !== "") {
@@ -129,7 +129,7 @@ var PoolWorker = function (logger) {
                 else {
                     pool.daemon.cmd('validateaddress', [workerName], function (results) {
                         var isValid = results.filter(function (r) {
-                            return r.response.isvalid
+                            return r.response.isvalid;
                         }).length > 0;
                         authCallback(isValid);
                     });
@@ -179,7 +179,7 @@ var PoolWorker = function (logger) {
             }
 
             // Manage Share Data
-            handlers.share(isValidShare, isValidBlock, data)
+            handlers.share(isValidShare, isValidBlock, data);
 
         // Establish Pool Functionality
         }).on('difficultyUpdate', function(workerName, diff) {
