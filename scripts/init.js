@@ -27,7 +27,7 @@ var algorithms = require('blazepool-stratum-pool/scripts/algorithms.js');
 JSON.minify = JSON.minify || require("node-json-minify");
 
 // Check to Ensure Config Exists
-if (!fs.existsSync('config.json')) {
+if (!fs.existsSync('../config.json')) {
     console.log('config.json file does not exist. Read the installation/setup instructions.');
     return;
 }
@@ -35,7 +35,7 @@ if (!fs.existsSync('config.json')) {
 // Establish Pool Variables
 var poolConfigs;
 var partnerConfigs;
-var portalConfig = JSON.parse(JSON.minify(fs.readFileSync("config.json", {encoding: 'utf8'})));
+var portalConfig = JSON.parse(JSON.minify(fs.readFileSync("../config.json", {encoding: 'utf8'})));
 var logger = new PoolLogger({
     logLevel: portalConfig.logLevel,
     logColors: portalConfig.logColors
@@ -140,7 +140,7 @@ function getRedisClient(portalConfig) {
 // Read and Combine ALL Pool Configurations
 function buildPoolConfigs() {
     var configs = {};
-    var configDir = 'configs/';
+    var configDir = '../configs/';
     var poolConfigFiles = [];
 
     // Get FileNames of Pool Configurations
@@ -210,7 +210,7 @@ function buildPoolConfigs() {
 // Read and Combine ALL Partner Configurations
 function buildPartnerConfigs() {
     var configs = {};
-    var configDir = 'partners/';
+    var configDir = '../partners/';
 
     // Get FileNames of Partner Configurations
     fs.readdirSync(configDir).forEach(function(file) {
