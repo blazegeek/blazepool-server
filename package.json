@@ -38,6 +38,7 @@
     "express": "*",
     "extend": "*",
     "forever": "^3.0.0",
+    "ini": "1.3.6",
     "mysql": "*",
     "node-json-minify": "*",
     "node-watch": "0.5.9",
