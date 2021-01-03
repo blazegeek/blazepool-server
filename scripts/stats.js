@@ -42,7 +42,7 @@ function sortProperties(obj, sortedBy, isNumericSort, reverse) {
 
 // Generate Redis Client
 function getRedisClient(portalConfig) {
-    redisConfig = portalConfig.redis;
+    var redisConfig = portalConfig.redis;
     var redisClient;
     if (redisConfig.cluster) {
         if (redisConfig.password !== "") {
@@ -120,6 +120,7 @@ var PoolStats = function (logger, poolConfigs, portalConfig) {
         // Check to Ensure Stats are Active
         if (!canDoStats) return;
         var poolConfig = poolConfigs[coin];
+        var redisConfig = portalConfig.redis;
 
         // Push Configurations to Each Redis Client
         for (var i = 0; i < redisClients.length; i++) {
@@ -422,7 +423,7 @@ var PoolStats = function (logger, poolConfigs, portalConfig) {
                     }
                     /* eslint-disable-next-line no-empty */
                     catch(e) {}
-                    if (jsonObj != null) {
+                    if (jsonObj !== null) {
                         coinStats.history = jsonObj;
                     }
 
@@ -434,7 +435,7 @@ var PoolStats = function (logger, poolConfigs, portalConfig) {
                         }
                         /* eslint-disable-next-line no-empty */
                         catch(e) {}
-                        if (jsonObj != null) {
+                        if (jsonObj !== null) {
                             coinStats.payments.push(jsonObj);
                         }
                     }
@@ -506,14 +507,14 @@ var PoolStats = function (logger, poolConfigs, portalConfig) {
                         var _workerRate = shareMultiplier * coinStats.workers.workers[worker].validShares / portalConfig.stats.hashrateWindow;
                         coinStats.workers.workers[worker].hashrate = _workerRate;
                         if (!coinStats.workers.workers[worker].soloMining) {
-                            coinStats.workers.workersShared[worker] = coinStats.workers.workers[worker]
-                            coinStats.hashrate.hashrateShared += _workerRate
-                            coinStats.hashrate.hashrate += _workerRate
+                            coinStats.workers.workersShared[worker] = coinStats.workers.workers[worker];
+                            coinStats.hashrate.hashrateShared += _workerRate;
+                            coinStats.hashrate.hashrate += _workerRate;
                         }
                         else {
-                            coinStats.workers.workersSolo[worker] = coinStats.workers.workers[worker]
-                            coinStats.hashrate.hashrateSolo += _workerRate
-                            coinStats.hashrate.hashrate += _workerRate
+                            coinStats.workers.workersSolo[worker] = coinStats.workers.workers[worker];
+                            coinStats.hashrate.hashrateSolo += _workerRate;
+                            coinStats.hashrate.hashrate += _workerRate;
                         }
                     }
 
@@ -529,7 +530,7 @@ var PoolStats = function (logger, poolConfigs, portalConfig) {
                         hashrateShared: coinStats.hashrate.hashrateShared,
                         workersSolo: coinStats.workers.workersSoloCount,
                         workersShared: coinStats.workers.workersSharedCount,
-                    }
+                    };
 
                     // Update Historical Data
                     coinStats.history.push(currentData);
