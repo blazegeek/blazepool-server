@@ -5,12 +5,12 @@
  */
 
 // Import Required Modules
-var redis = require('redis');
-var RedisClustr = require('redis-clustr');
+var redis = require("redis");
+var RedisClustr = require("redis-clustr");
 
 // Import Stratum/PoolShares Modules
-var PoolShares = require('./shares.js');
-var Stratum = require('blazepool-stratum-pool');
+var PoolShares = require("./shares.js");
+var Stratum = require("blazepool-stratum-pool");
 
 // Generate Redis Client
 function getRedisClient(portalConfig) {
@@ -84,9 +84,9 @@ var PoolWorker = function (logger) {
     var redisClient = getRedisClient(portalConfig);
 
     // Handle IPC Messages
-    process.on('message', function(message) {
+    process.on("message", function(message) {
         switch (message.type) {
-            case 'banIP':
+            case "banIP":
                 for (var p in pools) {
                     if (pools[p].stratumServer)
                         pools[p].stratumServer.addBannedIP(message.ip);
@@ -99,7 +99,7 @@ var PoolWorker = function (logger) {
     Object.keys(poolConfigs).forEach(function(coin) {
 
         // Establish Log Variables
-        var logSystem = 'Pool';
+        var logSystem = "Pool";
         var logComponent = coin;
         var logSubCat = `Thread ${  parseInt(forkId) + 1}`;
 
@@ -119,7 +119,7 @@ var PoolWorker = function (logger) {
             else {
                 if (workerName.length === 40) {
                     try {
-                        Buffer.from(workerName, 'hex');
+                        Buffer.from(workerName, "hex");
                         authCallback(true);
                     }
                     catch (e) {
@@ -127,7 +127,7 @@ var PoolWorker = function (logger) {
                     }
                 }
                 else {
-                    pool.daemon.cmd('validateaddress', [workerName], function (results) {
+                    pool.daemon.cmd("validateaddress", [workerName], function (results) {
                         var isValid = results.filter(function (r) {
                             return r.response.isvalid;
                         }).length > 0;
@@ -145,7 +145,7 @@ var PoolWorker = function (logger) {
         // Authenticate Worker
         var authorizeFN = function (ip, port, workerName, password, callback) {
             handlers.auth(port, workerName, password, function(authorized) {
-                var authString = authorized ? 'Authorized' : 'Unauthorized ';
+                var authString = authorized ? "Authorized" : "Unauthorized ";
                 logger.debug(logSystem, logComponent, logSubCat, `${authString  } ${  workerName  }:${  password  } [${  ip  }]`);
                 callback({
                     error: null,
@@ -157,7 +157,7 @@ var PoolWorker = function (logger) {
 
         // Establish Pool Share Handling
         var pool = Stratum.createPool(poolOptions, authorizeFN, logger);
-        pool.on('share', function(isValidShare, isValidBlock, data) {
+        pool.on("share", function(isValidShare, isValidBlock, data) {
 
             // Checks for Block Data
             var shareData = JSON.stringify(data);
@@ -169,9 +169,9 @@ var PoolWorker = function (logger) {
             // Checks for Share Data
             if (isValidShare) {
                 if (data.shareDiff > 1000000000)
-                    logger.debug(logSystem, logComponent, logSubCat, 'Share was found with diff higher than 1.000.000.000!');
+                    logger.debug(logSystem, logComponent, logSubCat, "Share was found with diff higher than 1.000.000.000!");
                 else if (data.shareDiff > 1000000)
-                    logger.debug(logSystem, logComponent, logSubCat, 'Share was found with diff higher than 1.000.000!');
+                    logger.debug(logSystem, logComponent, logSubCat, "Share was found with diff higher than 1.000.000!");
                 logger.debug(logSystem, logComponent, logSubCat, `Share accepted at diff ${  data.difficulty  }/${  data.shareDiff  } by ${  data.worker  } [${  data.ip  }]` );
             }
             else {
@@ -182,13 +182,13 @@ var PoolWorker = function (logger) {
             handlers.share(isValidShare, isValidBlock, data);
 
         // Establish Pool Functionality
-        }).on('difficultyUpdate', function(workerName, diff) {
+        }).on("difficultyUpdate", function(workerName, diff) {
             logger.debug(logSystem, logComponent, logSubCat, `Difficulty update to diff ${  diff  } workerName=${  JSON.stringify(workerName)}`);
             handlers.diff(workerName, diff);
-        }).on('log', function(severity, text) {
+        }).on("log", function(severity, text) {
             logger[severity](logSystem, logComponent, logSubCat, text);
-        }).on('banIP', function(ip, worker) {
-            process.send({type: 'banIP', ip: ip});
+        }).on("banIP", function(ip, worker) {
+            process.send({type: "banIP", ip: ip});
         });
 
         // Start Pool from Server
