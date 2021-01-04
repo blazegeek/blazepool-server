@@ -5,7 +5,7 @@
  */
 
 // Import Pool Functionality
-var PoolStats = require('./stats.js');
+var PoolStats = require("./stats.js");
 
 // Pool Stats Main Function
 var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
@@ -210,7 +210,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
         switch (req.params.method) {
 
             // Blocks Endpoint (Done)
-            case 'blocks':
+            case "blocks":
                 try {
 
                     // Check to Ensure URL is Formatted Properly
@@ -241,7 +241,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     };
 
                     // Finalize Endpoint Information
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.writeHead(200, { "Content-Type": "application/json" });
                     res.end(JSON.stringify(payload));
 
                     return;
@@ -257,14 +257,14 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     };
 
                     // Finalize Endpoint Information
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.writeHead(400, { "Content-Type": "application/json" });
                     res.end(JSON.stringify(payload));
 
                     return;
                 }
 
             // Combined Endpoint (Done)
-            case 'combined':
+            case "combined":
                 try {
 
                     // Check to Ensure URL is Formatted Properly
@@ -341,7 +341,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     };
 
                     // Finalize Endpoint Information
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.writeHead(200, { "Content-Type": "application/json" });
                     res.end(JSON.stringify(payload));
 
                     return;
@@ -357,14 +357,14 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     };
 
                     // Finalize Endpoint Information
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.writeHead(400, { "Content-Type": "application/json" });
                     res.end(JSON.stringify(payload));
 
                     return;
                 }
 
             // History Endpoint (Done)
-            case 'history':
+            case "history":
                 try {
 
                     // Check to Ensure URL is Formatted Properly
@@ -391,7 +391,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     };
 
                     // Finalize Endpoint Information
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.writeHead(200, { "Content-Type": "application/json" });
                     res.end(JSON.stringify(payload));
 
                     return;
@@ -407,14 +407,14 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     };
 
                     // Finalize Endpoint Information
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.writeHead(400, { "Content-Type": "application/json" });
                     res.end(JSON.stringify(payload));
 
                     return;
                 }
 
             // Partners Endpoint (Done)
-            case 'partners':
+            case "partners":
                 try {
 
                     // Check to Ensure URL is Formatted Properly
@@ -437,7 +437,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     };
 
                     // Finalize Endpoint Information
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.writeHead(200, { "Content-Type": "application/json" });
                     res.end(JSON.stringify(payload));
 
                     return;
@@ -453,14 +453,14 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     };
 
                     // Finalize Endpoint Information
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.writeHead(400, { "Content-Type": "application/json" });
                     res.end(JSON.stringify(payload));
 
                     return;
                 }
 
             // Payments Endpoint (Done)
-            case 'payments':
+            case "payments":
                 try {
 
                     // Check to Ensure URL is Formatted Properly
@@ -491,7 +491,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     };
 
                     // Finalize Endpoint Information
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.writeHead(200, { "Content-Type": "application/json" });
                     res.end(JSON.stringify(payload));
 
                     return;
@@ -507,14 +507,14 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     };
 
                     // Finalize Endpoint Information
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.writeHead(400, { "Content-Type": "application/json" });
                     res.end(JSON.stringify(payload));
 
                     return;
                 }
 
             // Statistics Endpoint (Done)
-            case 'statistics':
+            case "statistics":
                 try {
 
                     // Check to Ensure URL is Formatted Properly
@@ -572,7 +572,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     };
 
                     // Finalize Endpoint Information
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.writeHead(200, { "Content-Type": "application/json" });
                     res.end(JSON.stringify(payload));
 
                     return;
@@ -588,14 +588,14 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     };
 
                     // Finalize Endpoint Information
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.writeHead(400, { "Content-Type": "application/json" });
                     res.end(JSON.stringify(payload));
 
                     return;
                 }
 
             // Wallets Endpoint (Done)
-            case 'wallets':
+            case "wallets":
                 try {
 
                     // Check to Ensure URL is Formatted Properly
@@ -610,9 +610,9 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                             var blocks;
                             var payments;
                             var workers;
-                            var name = 'Bitcoin';
-                            var symbol = 'BTC';
-                            var algorithm = 'sha256';
+                            var name = "Bitcoin";
+                            var symbol = "BTC";
+                            var algorithm = "sha256";
                             var poolFlag = false;
 
                             // Get Block Information
@@ -667,7 +667,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                             };
 
                             // Finalize Endpoint Information
-                            res.writeHead(200, { 'Content-Type': 'application/json' });
+                            res.writeHead(200, { "Content-Type": "application/json" });
                             res.end(JSON.stringify(payload));
                         });
                     }
@@ -681,7 +681,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                             data: {},
                         };
 
-                        res.writeHead(400, { 'Content-Type': 'application/json' });
+                        res.writeHead(400, { "Content-Type": "application/json" });
                         res.end(JSON.stringify(payload));
                     }
 
@@ -698,14 +698,14 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     };
 
                     // Finalize Endpoint Information
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.writeHead(400, { "Content-Type": "application/json" });
                     res.end(JSON.stringify(payload));
 
                     return;
                 }
 
             // Workers Endpoint
-            case 'workers':
+            case "workers":
                 try {
 
                     // Check to Ensure URL is Formatted Properly
@@ -735,7 +735,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     };
 
                     // Finalize Endpoint Information
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.writeHead(200, { "Content-Type": "application/json" });
                     res.end(JSON.stringify(payload));
 
                     return;
@@ -751,7 +751,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
                     };
 
                     // Finalize Endpoint Information
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.writeHead(400, { "Content-Type": "application/json" });
                     res.end(JSON.stringify(payload));
 
                     return;
@@ -759,10 +759,8 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
 
             default:
                 next();
-
         }
     };
-
 };
 
 // Export Pool API
