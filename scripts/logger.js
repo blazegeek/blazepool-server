@@ -6,27 +6,27 @@
 
 // Import Required Modules
 /* eslint-disable no-unused-vars */
-var dateFormat = require('dateformat');
-var colors = require('colors');
+var dateFormat = require("dateformat");
+var colors = require("colors");
 
 // Establish Severity Values
 var severityValues = {
-    'debug': 1,
-    'warning': 2,
-    'error': 3,
-    'special': 4
+    "debug": 1,
+    "warning": 2,
+    "error": 3,
+    "special": 4
 };
 
 // Indicate Severity By Colors
 var severityColors = function(severity, text) {
     switch (severity) {
-        case 'special':
+        case "special":
             return text.cyan.underline;
-        case 'debug':
+        case "debug":
             return text.green;
-        case 'warning':
+        case "warning":
             return text.yellow;
-        case 'error':
+        case "error":
             return text.red;
         default:
             console.log(`Unknown severity ${  severity}`);
@@ -56,7 +56,7 @@ var PoolLogger = function (configuration) {
         }
 
         // Manage Logger Message
-        var entryDesc = `${dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss')  } [${  system  }]\t`;
+        var entryDesc = `${dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss")  } [${  system  }]\t`;
         if (logColors) {
             entryDesc = severityColors(severity, entryDesc);
             // Format Logger Message
