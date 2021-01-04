@@ -5,12 +5,12 @@
  */
 
 // Import Required Modules
-var redis = require('redis');
-var async = require('async');
-var RedisClustr = require('redis-clustr');
+var redis = require("redis");
+var async = require("async");
+var RedisClustr = require("redis-clustr");
 
 // Import Stratum Algorithms
-var algorithms = require('blazepool-stratum-pool/scripts/algorithms.js');
+var algorithms = require("blazepool-stratum-pool/scripts/algorithms.js");
 
 // Sort Object Properties Given Info
 /* eslint-disable no-prototype-builtins */
@@ -105,7 +105,7 @@ var PoolStats = function (logger, poolConfigs, portalConfig) {
     var redisStats;
 
     // Establish Log Variables
-    var logSystem = 'Stats';
+    var logSystem = "Stats";
 
     // Establish Stat Variables
     this.stats = {};
@@ -163,15 +163,15 @@ var PoolStats = function (logger, poolConfigs, portalConfig) {
 
         // Establish Redis Client
         var redisStats = getRedisClient(portalConfig);
-        redisStats.on('error', function(error) {
-            logger.error(logSystem, 'History', `Redis for stats had an error ${  JSON.stringify(error)}`);
+        redisStats.on("error", function(error) {
+            logger.error(logSystem, "History", `Redis for stats had an error ${  JSON.stringify(error)}`);
         });
     }
 
     // Sort All Pools
     function sortPools(objects) {
         var newObject = {};
-        var sortedArray = sortProperties(objects, 'name', false, false);
+        var sortedArray = sortProperties(objects, "name", false, false);
         for (var i = 0; i < sortedArray.length; i++) {
             var key = sortedArray[i][0];
             var value = sortedArray[i][1];
@@ -332,18 +332,18 @@ var PoolStats = function (logger, poolConfigs, portalConfig) {
             var windowTime = (((Date.now() / 1000) - portalConfig.stats.hashrateWindow) | 0).toString();
             var redisCommands = [];
             var redisCommandTemplates = [
-                ['zrangebyscore', ':statistics:hashrate', windowTime, '+inf'],
-                ['hgetall', ':statistics:history'],
-                ['hgetall', ':statistics:basic'],
-                ['scard', ':blocks:pending'],
-                ['scard', ':blocks:confirmed'],
-                ['scard', ':blocks:kicked'],
-                ['smembers', ':blocks:pending'],
-                ['smembers', ':blocks:confirmed'],
-                ['hgetall', ':blocks:pendingConfirms'],
-                ['hgetall', ':shares:roundCurrent'],
-                ['hgetall', ':times:timesCurrent'],
-                ['zrange', ':payments:payments', -100, -1],
+                ["zrangebyscore", ":statistics:hashrate", windowTime, "+inf"],
+                ["hgetall", ":statistics:history"],
+                ["hgetall", ":statistics:basic"],
+                ["scard", ":blocks:pending"],
+                ["scard", ":blocks:confirmed"],
+                ["scard", ":blocks:kicked"],
+                ["smembers", ":blocks:pending"],
+                ["smembers", ":blocks:confirmed"],
+                ["hgetall", ":blocks:pendingConfirms"],
+                ["hgetall", ":shares:roundCurrent"],
+                ["hgetall", ":times:timesCurrent"],
+                ["zrange", ":payments:payments", -100, -1],
             ];
 
             // Get Templates for Each Coin
@@ -360,7 +360,7 @@ var PoolStats = function (logger, poolConfigs, portalConfig) {
             // Get Global Statistics for Each Coin
             client.client.multi(redisCommands).exec(function(error, replies) {
                 if (error) {
-                    logger.error(logSystem, 'Global', `error with getting global stats ${  JSON.stringify(error)}`);
+                    logger.error(logSystem, "Global", `error with getting global stats ${  JSON.stringify(error)}`);
                     callback(error);
                 }
 
@@ -565,7 +565,7 @@ var PoolStats = function (logger, poolConfigs, portalConfig) {
 
         }, function(error) {
             if (error) {
-                logger.error(logSystem, 'Global', `error getting all stats${  JSON.stringify(error)}`);
+                logger.error(logSystem, "Global", `error getting all stats${  JSON.stringify(error)}`);
                 callback();
                 return;
             }
