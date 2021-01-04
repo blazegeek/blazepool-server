@@ -1,3 +1,4 @@
+/* jshint esversion: 6 */
 /*
  *
  * PoolShares (Updated)
@@ -92,6 +93,7 @@ var PoolShares = function (logger, poolConfig, portalConfig) {
     var redisClient = getRedisClient(portalConfig);
 
     // Manage Ready Endpoint
+    var redisConfig = portalConfig.redis;
     redisClient.on("ready", function() {
         logger.debug(logSystem, logComponent, logSubCat, `Share processing setup with redis (${  redisConfig.host
             }:${  redisConfig.port   })`);
