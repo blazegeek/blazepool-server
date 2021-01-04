@@ -18,14 +18,11 @@
     "url": "https://github.com/blazegeek/blazepool-server.git"
   },
   "scripts": {
-    "start": "nodemon scripts/init.js",
-    "prod:start": "forever start -l blinkhash-log.txt --append scripts/init.js",
-    "prod:stop": "forever stop scripts/init.js"
+    "start": "nodemon scripts/init.js"
   },
   "dependencies": {
     "apicache": "^1.5.3",
     "async": "1.5.2",
-    "babel-eslint": "^10.1.0",
     "bignum": "0.13.1",
     "body-parser": "*",
     "colors": "*",
