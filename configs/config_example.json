@@ -2,10 +2,10 @@
 	"enabled": true,
 	"featured": true,
 	"fees": 1.0,
-	"identifier": "http://geekpool.blazegeek.com",
+	"identifier": "geekpool.blazegeek.com",
 	"logo": "",
 	"addresses": {
-		"address": "GJeg4QGBFeg5UFHSgnZoXtqXL5nPuGqgDn",
+		"address": "",
 		"tAddress": "",
 		"zAddress": ""
 	},
@@ -13,7 +13,7 @@
 		"name": "GeekCash",
 		"symbol": "GEEK",
 		"algorithm": "geek",
-		"peerMagic": "86c6bb8",
+		"peerMagic": "b86c6bb8",
 		"peerMagicTestnet": "cee2caff",
 		"hasGetInfo": true,
 		"hashrateType": "hashes",
@@ -28,8 +28,8 @@
 			"network": "",
 			"bech32": "",
 			"bip32": {
-					"public": "0488b21e",
-					"private": "0488ade4"
+				"public": "0488b21e",
+				"private": "0488ade4"
 			},
 			"pubKeyHash": "26",
 			"scriptHash": "13",
@@ -44,9 +44,9 @@
 			"network": "",
 			"bech32": "",
 			"bip32": {
-					"public": "043587cf",
-					"private": "04358394"
-			 },
+				"public": "043587cf",
+				"private": "04358394"
+			},
 			"pubKeyHash": "26",
 			"scriptHash": "13",
 			"wif": "cc"
@@ -101,11 +101,28 @@
 		"daemon": {
 			"host": "127.0.0.1",
 			"port": 6888,
-			"user": "blazegeek",
-			"password": "pool"
+			"user": "",
+			"password": ""
 		}
 	},
-	"ports": {},
+	"ports": {
+		"2222": {
+			"diff": 0.01
+		},
+		"3333": {
+			"diff": 2
+		},
+		"9999": {
+			"diff": 0.5,
+			"varDiff": {
+				"minDiff": 0.01,
+				"maxDiff": 1000,
+				"targetTime": 15,
+				"retargetTime": 60,
+				"variancePercent": 33
+			}
+		}
+	},
 	"p2p": {
 		"enabled": true,
 		"host": "127.0.0.1",
