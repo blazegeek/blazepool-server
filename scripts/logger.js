@@ -17,16 +17,16 @@ var severityValues = {
 var severityColors = function (severity, text) {
 	switch (severity) {
 		case "special":
-			return text.cyan.underline;
+			return text.green.underline;
 		case "debug":
-			return text.green;
+			return text.cyan;
 		case "warning":
-			return text.yellow;
+			return text.bgYellow.grey.bold;
 		case "error":
-			return text.red;
+			return text.bgRed.white.bold;
 		default:
 			console.log(`Unknown severity ${severity}`);
-			return text.italic;
+			return text.magenta;
 	}
 };
 
@@ -51,16 +51,21 @@ var PoolLogger = function (configuration) {
 
 		// Manage Logger Message
 		var entryDesc = `${dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss")} [${system}]\t`;
+
 		if (logColors) {
 			entryDesc = severityColors(severity, entryDesc);
 			// Format Logger Message
-			var logString = entryDesc + `[${component}] `.italic;
-			if (subcat) logString += `(${subcat}) `.bold.grey;
-			logString += text.grey;
+			var logString = entryDesc + `[${component}] `;
+			if (subcat) {
+				logString += `(${subcat}) `.white.bold;
+			}
+			logString += text.white;
 		} else {
 			// Format Logger Message
 			var logString = `${entryDesc}[${component}] `;
-			if (subcat) logString += `(${subcat}) `;
+			if (subcat) {
+				logString += `(${subcat}) `;
+			}
 			logString += text;
 		}
 
