@@ -66,7 +66,7 @@ function getRedisClient(portalConfig) {
 }
 
 // Pool Worker Main Function
-/* eslint no-unused-vars: ["error", { "args": "none" }] */
+/* eslint no-unused-vars: ["error", "args": "none"}] */
 var PoolWorker = function (logger) {
 	// Load Useful Data from Process
 	var forkId = process.env.forkId;

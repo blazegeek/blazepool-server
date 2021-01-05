@@ -11,7 +11,7 @@ var express = require("express");
 var PoolAPI = require("./api.js");
 
 // Pool Server Main Function
-/* eslint no-unused-vars: ["error", { "args": "none" }] */
+/* eslint no-unused-vars: ["error", {"args": "none"}] */
 var PoolServer = function (logger) {
 	// Load Useful Data from Process
 	var partnerConfigs = JSON.parse(process.env.partners);

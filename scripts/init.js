@@ -31,7 +31,7 @@ if (!fs.existsSync("../config.json")) {
 // Establish Pool Variables
 var poolConfigs;
 var partnerConfigs;
-var portalConfig = JSON.parse(JSON.minify(fs.readFileSync("../config.json", { encoding: "utf8" })));
+var portalConfig = JSON.parse(JSON.minify(fs.readFileSync("../config.json", {encoding: "utf8"})));
 var logger = new PoolLogger({
 	logLevel: portalConfig.logLevel,
 	logColors: portalConfig.logColors,
@@ -41,7 +41,7 @@ var logger = new PoolLogger({
 try {
 	var posix = require("posix");
 	try {
-		posix.setrlimit("nofile", { soft: 100000, hard: 100000 });
+		posix.setrlimit("nofile", {soft: 100000, hard: 100000});
 		logger.debug("POSIX", "Connection Limit", `Raised to 100K concurrent connections, now running as non-root user: ${process.getuid()}`);
 	} catch (e) {
 		if (cluster.isMaster) logger.warning("POSIX", "Connection Limit", "(Safe to ignore) Must be ran as root to increase resource limits");
@@ -139,7 +139,7 @@ function buildPoolConfigs() {
 	// Get FileNames of Pool Configurations
 	fs.readdirSync(configDir).forEach(function (file) {
 		if (!fs.existsSync(configDir + file) || path.extname(configDir + file) !== ".json") return;
-		var poolOptions = JSON.parse(JSON.minify(fs.readFileSync(configDir + file, { encoding: "utf8" })));
+		var poolOptions = JSON.parse(JSON.minify(fs.readFileSync(configDir + file, {encoding: "utf8"})));
 		if (!poolOptions.enabled) return;
 		poolOptions.fileName = file;
 		poolConfigFiles.push(poolOptions);
@@ -206,7 +206,7 @@ function buildPartnerConfigs() {
 	fs.readdirSync(configDir).forEach(function (file) {
 		const currentDate = new Date();
 		if (!fs.existsSync(configDir + file) || path.extname(configDir + file) !== ".json") return;
-		var partnerOptions = JSON.parse(JSON.minify(fs.readFileSync(configDir + file, { encoding: "utf8" })));
+		var partnerOptions = JSON.parse(JSON.minify(fs.readFileSync(configDir + file, {encoding: "utf8"})));
 		if (new Date(partnerOptions.subscription.endDate) < currentDate) return;
 		configs[partnerOptions.name] = partnerOptions;
 	});
@@ -231,7 +231,7 @@ function startPoolListener() {
 			switch (command) {
 				case "reloadpool":
 					Object.keys(cluster.workers).forEach(function (id) {
-						cluster.workers[id].send({ type: "reloadpool", coin: params[0] });
+						cluster.workers[id].send({type: "reloadpool", coin: params[0]});
 					});
 					reply(`reloaded pool ${params[0]}`);
 					break;
@@ -351,7 +351,7 @@ function startPoolWorkers() {
 					case "banIP":
 						Object.keys(cluster.workers).forEach(function (id) {
 							if (cluster.workers[id].type === "worker") {
-								cluster.workers[id].send({ type: "banIP", ip: msg.ip });
+								cluster.workers[id].send({type: "banIP", ip: msg.ip});
 							}
 						});
 						break;
