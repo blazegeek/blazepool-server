@@ -183,6 +183,11 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
 						true
 					);
 				} else {
+					logger.debug(
+						logSystem,
+						logComponent,
+						`Pool address: ${address} verified!`
+					);
 					callback();
 				}
 			},
@@ -222,11 +227,12 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
 
 	// Return Main Unspent Balance
 	function listUnspent(addr, notAddr, minConf, displayBool, callback) {
+		var args = [];
 		if (addr !== null) {
-			var args = [minConf, 99999999, [addr]];
+			args = [minConf, 99999999, [addr]];
 		} else {
 			addr = "Payout wallet";
-			var args = [minConf, 99999999];
+			args = [minConf, 99999999];
 		}
 		daemon.cmd("listunspent", args, function (result) {
 			if (!result || result.error || result[0].error) {
