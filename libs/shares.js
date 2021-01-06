@@ -1,7 +1,7 @@
 /* PoolShares (Updated) */
 
 // Import Required Modules
-var redis = require("redis");
+var Redis = require("redis");
 var RedisClustr = require("redis-clustr");
 
 // Round to # of Digits Given
@@ -29,7 +29,7 @@ function getRedisClient(portalConfig) {
 					},
 				],
 				createClient: function (port, host, options) {
-					return redis.createClient({
+					return Redis.createClient({
 						port: port,
 						host: host,
 						password: options.password,
@@ -48,7 +48,7 @@ function getRedisClient(portalConfig) {
 					},
 				],
 				createClient: function (port, host) {
-					return redis.createClient({
+					return Redis.createClient({
 						port: port,
 						host: host,
 					});
@@ -57,13 +57,13 @@ function getRedisClient(portalConfig) {
 		}
 	} else {
 		if (redisConfig.password !== "") {
-			redisClient = redis.createClient({
+			redisClient = Redis.createClient({
 				port: redisConfig.port,
 				host: redisConfig.host,
 				password: redisConfig.password,
 			});
 		} else {
-			redisClient = redis.createClient({
+			redisClient = Redis.createClient({
 				port: redisConfig.port,
 				host: redisConfig.host,
 			});
@@ -73,7 +73,6 @@ function getRedisClient(portalConfig) {
 }
 
 // Pool Payments Main Function
-/* eslint no-unused-vars: ["error", {"args": "none"}] */
 var PoolShares = function (logger, poolConfig, portalConfig) {
 	// Establish Shares Variables
 	var coin = poolConfig.coin.name;
@@ -90,7 +89,7 @@ var PoolShares = function (logger, poolConfig, portalConfig) {
 	// Manage Ready Endpoint
 	var redisConfig = portalConfig.redis;
 	redisClient.on("ready", function () {
-		logger.debug(logSystem, logComponent, logSubCat, `Share processing setup with redis (${redisConfig.host}:${redisConfig.port})`);
+		logger.debug(logSystem, logComponent, logSubCat, `Share processing setup with Redis (${redisConfig.host}:${redisConfig.port})`);
 	});
 
 	// Manage Error Endpoint
@@ -100,7 +99,7 @@ var PoolShares = function (logger, poolConfig, portalConfig) {
 
 	// Manage End Endpoint
 	redisClient.on("end", function () {
-		logger.error(logSystem, logComponent, logSubCat, "Connection to redis database has been ended");
+		logger.error(logSystem, logComponent, logSubCat, "Connection to Redis database has been ended");
 	});
 
 	// Manage Information Endpoint
@@ -125,17 +124,13 @@ var PoolShares = function (logger, poolConfig, portalConfig) {
 
 		// Check if Version is Unidentified
 		if (!version) {
-			logger.error(logSystem, logComponent, logSubCat, "Could not detect redis version - but be super old or broken");
+			logger.error(logSystem, logComponent, logSubCat, "Could not detect Redis version - but be super old or broken");
 		}
 
 		// Check if Version < 2.6
 		else if (version < 2.6) {
 			logger.error(
-				logSystem,
-				logComponent,
-				logSubCat,
-				`You're using redis version ${versionString} the minimum required version is 2.6. Follow the damn usage instructions...`
-			);
+				logSystem, logComponent, logSubCat, `You're using Redis version ${versionString} the minimum required version is 2.6.`);
 		}
 	});
 

@@ -11,16 +11,14 @@ var express = require("express");
 var PoolAPI = require("./api.js");
 
 // Pool Server Main Function
-/* eslint no-unused-vars: ["error", {"args": "none"}] */
 var PoolServer = function (logger) {
 	// Load Useful Data from Process
-	var partnerConfigs = JSON.parse(process.env.partners);
 	var poolConfigs = JSON.parse(process.env.pools);
 	var portalConfig = JSON.parse(process.env.portalConfig);
 
 	// Establish Server Variables
-	var portalApi = new PoolAPI(logger, partnerConfigs, poolConfigs, portalConfig);
-	var portalStats = portalApi.stats;
+	var portalAPI = new PoolAPI(logger, poolConfigs, portalConfig);
+	var portalStats = portalAPI.stats;
 	var logSystem = "Server";
 
 	// Gather Global Statistics
@@ -39,7 +37,7 @@ var PoolServer = function (logger) {
 	app.use(compress());
 	app.use(cors());
 	app.get("/api/v1/:method", function (req, res, next) {
-		portalApi.handleApiRequest(req, res, next);
+		portalAPI.handleApiRequest(req, res, next);
 	});
 	app.use(function (err, req, res, next) {
 		console.error(err.stack);
@@ -54,11 +52,7 @@ var PoolServer = function (logger) {
 	} catch (e) {
 		// Error Starting Main Server
 		clearInterval(globalInterval);
-		logger.error(
-			logSystem,
-			"Server",
-			`Could not start website on ${portalConfig.server.host}:${portalConfig.server.port} - it's either in use or you do not have permission`
-		);
+		logger.error(logSystem, "Server", `Could not start website on ${portalConfig.server.host}:${portalConfig.server.port} - it's either in use or you do not have permission`);
 	}
 };
 

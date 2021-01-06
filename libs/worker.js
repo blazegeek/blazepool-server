@@ -1,7 +1,7 @@
 /* PoolWorker (Updated) */
 
 // Import Required Modules
-var redis = require("redis");
+var Redis = require("redis");
 var RedisClustr = require("redis-clustr");
 
 // Import Stratum/PoolShares Modules
@@ -22,7 +22,7 @@ function getRedisClient(portalConfig) {
 					},
 				],
 				createClient: function (port, host, options) {
-					return redis.createClient({
+					return Redis.createClient({
 						port: port,
 						host: host,
 						password: options.password,
@@ -41,7 +41,7 @@ function getRedisClient(portalConfig) {
 					},
 				],
 				createClient: function (port, host) {
-					return redis.createClient({
+					return Redis.createClient({
 						port: port,
 						host: host,
 					});
@@ -50,13 +50,13 @@ function getRedisClient(portalConfig) {
 		}
 	} else {
 		if (redisConfig.password !== "") {
-			redisClient = redis.createClient({
+			redisClient = Redis.createClient({
 				port: redisConfig.port,
 				host: redisConfig.host,
 				password: redisConfig.password,
 			});
 		} else {
-			redisClient = redis.createClient({
+			redisClient = Redis.createClient({
 				port: redisConfig.port,
 				host: redisConfig.host,
 			});
@@ -66,7 +66,6 @@ function getRedisClient(portalConfig) {
 }
 
 // Pool Worker Main Function
-/* eslint no-unused-vars: ["error", "args": "none"}] */
 var PoolWorker = function (logger) {
 	// Load Useful Data from Process
 	var forkId = process.env.forkId;
@@ -86,6 +85,13 @@ var PoolWorker = function (logger) {
 				for (var p in pools) {
 					if (pools[p].stratumServer) pools[p].stratumServer.addBannedIP(message.ip);
 				}
+				break;
+			case "blocknotify":
+				var messageCoin = message.coin.toLowerCase();
+				var poolTarget = Object.keys(pools).filter(function (p) {
+					return p.toLowerCase() === messageCoin;
+				})[0];
+				if (poolTarget) pools[poolTarget].processBlockNotify(message.hash, "blocknotify script");
 				break;
 		}
 	});
@@ -108,8 +114,9 @@ var PoolWorker = function (logger) {
 
 		// Establish Worker Authentication
 		handlers.auth = function (port, workerName, password, authCallback) {
-			if (poolOptions.validateWorkerUsername !== true) authCallback(true);
-			else {
+			if (poolOptions.validateWorkerUsername !== true) {
+				authCallback(true);
+			} else {
 				if (workerName.length === 40) {
 					try {
 						Buffer.from(workerName, "hex");
@@ -118,7 +125,7 @@ var PoolWorker = function (logger) {
 						authCallback(false);
 					}
 				} else {
-					pool.daemon.cmd("validateaddress", [workerName], function (results) {
+					Pool.daemon.cmd("validateaddress", [workerName], function (results) {
 						var isValid =
 							results.filter(function (r) {
 								return r.response.isvalid;
@@ -148,53 +155,46 @@ var PoolWorker = function (logger) {
 		};
 
 		// Establish Pool Share Handling
-		var pool = Stratum.createPool(poolOptions, authorizeFN, logger);
-		pool
-			.on("share", function (isValidShare, isValidBlock, data) {
-				// Checks for Block Data
-				var shareData = JSON.stringify(data);
-				if (data.blockHash && !isValidBlock)
-					logger.debug(
-						logSystem,
-						logComponent,
-						logSubCat,
-						`We thought a block was found but it was rejected by the daemon, share data: ${shareData}`
-					);
-				else if (isValidBlock) logger.debug(logSystem, logComponent, logSubCat, `Block found: ${data.blockHash} by ${data.worker}`);
+		var Pool = Stratum.createPool(poolOptions, authorizeFN, logger);
+		Pool.on("share", function (isValidShare, isValidBlock, data) {
+			// Checks for Block Data
+			var shareData = JSON.stringify(data);
+			if (data.blockHash && !isValidBlock)
+				logger.debug(logSystem, logComponent, logSubCat, `We thought a block was found but it was rejected by the daemon, share data: ${shareData}`);
+			else if (isValidBlock) logger.debug(logSystem, logComponent, logSubCat, `Block found: ${data.blockHash} by ${data.worker}`);
 
-				// Checks for Share Data
-				if (isValidShare) {
-					if (data.shareDiff > 1000000000) logger.debug(logSystem, logComponent, logSubCat, "Share was found with diff higher than 1.000.000.000!");
-					else if (data.shareDiff > 1000000) logger.debug(logSystem, logComponent, logSubCat, "Share was found with diff higher than 1.000.000!");
-					logger.debug(
-						logSystem,
-						logComponent,
-						logSubCat,
-						`Share accepted at diff ${data.difficulty}/${data.shareDiff} by ${data.worker} [${data.ip}]`
-					);
-				} else {
-					logger.debug(logSystem, logComponent, logSubCat, `Share rejected: ${shareData}`);
-				}
+			// Checks for Share Data
+			if (isValidShare) {
+				if (data.shareDiff > 1000000000) logger.debug(logSystem, logComponent, logSubCat, "Share was found with diff higher than 1.000.000.000!");
+				else if (data.shareDiff > 1000000) logger.debug(logSystem, logComponent, logSubCat, "Share was found with diff higher than 1.000.000!");
+				logger.debug(
+					logSystem,
+					logComponent,
+					logSubCat,
+					`Share accepted at diff ${data.difficulty}/${data.shareDiff} by ${data.worker} [${data.ip}]`
+				);
+			} else {
+				logger.debug(logSystem, logComponent, logSubCat, `Share rejected: ${shareData}`);
+			}
 
-				// Manage Share Data
-				handlers.share(isValidShare, isValidBlock, data);
-
-				// Establish Pool Functionality
-			})
+			// Manage Share Data
+			handlers.share(isValidShare, isValidBlock, data);
+			// Establish Pool Functionality
+		})
 			.on("difficultyUpdate", function (workerName, diff) {
 				logger.debug(logSystem, logComponent, logSubCat, `Difficulty update to diff ${diff} workerName=${JSON.stringify(workerName)}`);
 				handlers.diff(workerName, diff);
-			})
+		})
 			.on("log", function (severity, text) {
 				logger[severity](logSystem, logComponent, logSubCat, text);
-			})
+		})
 			.on("banIP", function (ip, worker) {
 				process.send({ type: "banIP", ip: ip });
-			});
+		});
 
 		// Start Pool from Server
-		pool.start();
-		pools[poolOptions.coin.name] = pool;
+		Pool.start();
+		pools[poolOptions.coin.name] = Pool;
 	});
 };
 

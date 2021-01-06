@@ -2,7 +2,5 @@ node_modules/
 .idea/
 npm-debug.log
 config.json
-configs/*
-!configs/example.json
-partners/*
-!partners/example.json
+pool-configs/*
+!pool-configs/example.json

@@ -6,53 +6,58 @@ var path = require("path");
 var os = require("os");
 var cluster = require("cluster");
 var extend = require("extend");
-var redis = require("redis");
+
+var async = require("async");
+
+var Redis = require("redis");
 var RedisClustr = require("redis-clustr");
 
 // Import Pool Functionality
-var PoolListener = require("./listener.js");
-var PoolLogger = require("./logger.js");
-var PoolPayments = require("./payments.js");
-var PoolServer = require("./server.js");
-var PoolWorker = require("./worker.js");
+var PoolListener = require("./libs/listener.js");
+var PoolLogger = require("./libs/logger.js");
+var PoolPayments = require("./libs/payments.js");
+var PoolServer = require("./libs/server.js"); // API server
+var PoolWorker = require("./libs/worker.js");
+//var PoolWebsite = require("./libs/website.js"); // Front-end
 
 // Import Stratum Algorithms
-var algorithms = require("blazepool-stratum-pool/scripts/algorithms.js");
+var Algorithms = require("blazepool-stratum-pool/scripts/algorithms.js");
 
 // Import JSON Functionality
 JSON.minify = JSON.minify || require("node-json-minify");
 
 // Check to Ensure Config Exists
-if (!fs.existsSync("../config.json")) {
+if (!fs.existsSync("config.json")) {
 	console.log("config.json file does not exist. Read the installation/setup instructions.");
 	return;
 }
 
 // Establish Pool Variables
 var poolConfigs;
-var partnerConfigs;
-var portalConfig = JSON.parse(JSON.minify(fs.readFileSync("../config.json", {encoding: "utf8"})));
-var logger = new PoolLogger({
-	logLevel: portalConfig.logLevel,
-	logColors: portalConfig.logColors,
-});
-
+var portalConfig = JSON.parse(JSON.minify(fs.readFileSync("config.json", {encoding: "utf8"})));
 // Check for POSIX Installation
 try {
 	var posix = require("posix");
 	try {
 		posix.setrlimit("nofile", {soft: 100000, hard: 100000});
 		logger.debug("POSIX", "Connection Limit", `Raised to 100K concurrent connections, now running as non-root user: ${process.getuid()}`);
-	} catch (e) {
-		if (cluster.isMaster) logger.warning("POSIX", "Connection Limit", "(Safe to ignore) Must be ran as root to increase resource limits");
-	} finally {
+	}
+	catch (e) {
+		if (cluster.isMaster) {
+			logger.warning("POSIX", "Connection Limit", "(Safe to ignore) Must be ran as root to increase resource limits");
+		}
+	}
+	finally {
+    // Find out which user used sudo through the environment variable
 		var uid = parseInt(process.env.SUDO_UID);
 		if (uid) {
+			// Set our server's uid to that user
 			process.setuid(uid);
 			logger.debug("POSIX", "Connection Limit", `Raised to 100K concurrent connections, now running as non-root user: ${process.getuid()}`);
 		}
 	}
-} catch (e) {
+}
+catch (e) {
 	if (cluster.isMaster)
 		logger.debug("POSIX", "Connection Limit", "(Safe to ignore) POSIX module not installed and resource (connection) limit was not raised");
 }
@@ -69,11 +74,14 @@ if (cluster.isWorker) {
 		case "worker":
 			new PoolWorker(logger);
 			break;
+/* 		case "website":
+   		new PoolWebsite(logger);
+   		break;	*/
 	}
 	return;
 }
 
-// Generate Redis Client
+// Generate Redis Client (Is this needed here? Function is defined in payments.js)
 function getRedisClient(portalConfig) {
 	var redisConfig = portalConfig.redis;
 	var redisClient;
@@ -87,7 +95,7 @@ function getRedisClient(portalConfig) {
 					},
 				],
 				createClient: function (port, host, options) {
-					return redis.createClient({
+					return Redis.createClient({
 						port: port,
 						host: host,
 						password: options.password,
@@ -106,7 +114,7 @@ function getRedisClient(portalConfig) {
 					},
 				],
 				createClient: function (port, host) {
-					return redis.createClient({
+					return Redis.createClient({
 						port: port,
 						host: host,
 					});
@@ -115,13 +123,13 @@ function getRedisClient(portalConfig) {
 		}
 	} else {
 		if (redisConfig.password !== "") {
-			redisClient = redis.createClient({
+			redisClient = Redis.createClient({
 				port: redisConfig.port,
 				host: redisConfig.host,
 				password: redisConfig.password,
 			});
 		} else {
-			redisClient = redis.createClient({
+			redisClient = Redis.createClient({
 				port: redisConfig.port,
 				host: redisConfig.host,
 			});
@@ -133,7 +141,7 @@ function getRedisClient(portalConfig) {
 // Read and Combine ALL Pool Configurations
 function buildPoolConfigs() {
 	var configs = {};
-	var configDir = "../configs/";
+	var configDir = "./pool-configs/";
 	var poolConfigFiles = [];
 
 	// Get FileNames of Pool Configurations
@@ -180,37 +188,23 @@ function buildPoolConfigs() {
 			if (!(option in poolOptions)) {
 				var toCloneOption = portalConfig.defaultPoolConfigs[option];
 				var clonedOption = {};
-				if (toCloneOption.constructor === Object) extend(true, clonedOption, toCloneOption);
-				else clonedOption = toCloneOption;
+				if (toCloneOption.constructor === Object) {
+					extend(true, clonedOption, toCloneOption);
+				}
+				else {
+					clonedOption = toCloneOption;
+				}
 				poolOptions[option] = clonedOption;
 			}
 		}
 		configs[poolOptions.coin.name] = poolOptions;
 
 		// Check to Ensure Algorithm is Supported
-		if (!(poolOptions.coin.algorithm in algorithms)) {
+		if (!(poolOptions.coin.algorithm in Algorithms)) {
 			logger.error("Master", poolOptions.coin.name, `Cannot run a pool for unsupported algorithm "${poolOptions.coin.algorithm}"`);
 			delete configs[poolOptions.coin.name];
 		}
 	});
-
-	return configs;
-}
-
-// Read and Combine ALL Partner Configurations
-function buildPartnerConfigs() {
-	var configs = {};
-	var configDir = "../partners/";
-
-	// Get FileNames of Partner Configurations
-	fs.readdirSync(configDir).forEach(function (file) {
-		const currentDate = new Date();
-		if (!fs.existsSync(configDir + file) || path.extname(configDir + file) !== ".json") return;
-		var partnerOptions = JSON.parse(JSON.minify(fs.readFileSync(configDir + file, {encoding: "utf8"})));
-		if (new Date(partnerOptions.subscription.endDate) < currentDate) return;
-		configs[partnerOptions.name] = partnerOptions;
-	});
-
 	return configs;
 }
 
@@ -221,8 +215,7 @@ function startPoolListener() {
 	var listener = new PoolListener(cliPort);
 
 	// Establish Listener Log
-	listener
-		.on("log", function (text) {
+	listener.on("log", function (text) {
 			logger.debug("Master", "CLI", text);
 
 			// Establish Listener Commands
@@ -233,95 +226,60 @@ function startPoolListener() {
 					Object.keys(cluster.workers).forEach(function (id) {
 						cluster.workers[id].send({type: "reloadpool", coin: params[0]});
 					});
-					reply(`reloaded pool ${params[0]}`);
+					reply(`Reloaded Pool ${params[0]}`);
+					break;
+				case "blocknotify":
+					Object.keys(cluster.workers).forEach(function (id) {
+						cluster.workers[id].send({type: "blocknotify", coin: params[0], hash: params[1]});
+					});
+					reply("Pool workers notified");
 					break;
 				default:
-					reply(`unrecognized command "${command}"`);
+					reply(`Unrecognized command: "${command}"`);
 					break;
 			}
 		})
 		.start();
 }
 
-// Functionality for Pool Payments
-function startPoolPayments() {
-	// Check if Pool Enabled Payments
-	var enabledForAny = false;
-	for (var pool in poolConfigs) {
-		var p = poolConfigs[pool];
-		var enabled = p.enabled && p.paymentProcessing && p.paymentProcessing.enabled;
-		if (enabled) {
-			enabledForAny = true;
-			break;
-		}
-	}
-
-	// Return if No One Needs Payments
-	if (!enabledForAny) return;
-
-	// Establish Pool Payments
-	var worker = cluster.fork({
-		workerType: "payments",
-		pools: JSON.stringify(poolConfigs),
-		portalConfig: JSON.stringify(portalConfig),
-	});
-
-	/* eslint-disable no-unused-vars */
-	worker.on("exit", function (code, signal) {
-		logger.error("Master", "Payments", "Payment process died, starting replacement...");
-		setTimeout(function () {
-			startPoolPayments();
-		}, 2000);
-	});
-}
-
-function startPoolServer() {
-	var worker = cluster.fork({
-		workerType: "server",
-		partners: JSON.stringify(partnerConfigs),
-		pools: JSON.stringify(poolConfigs),
-		portalConfig: JSON.stringify(portalConfig),
-	});
-
-	/* eslint-disable no-unused-vars */
-	worker.on("exit", function (code, signal) {
-		logger.error("Master", "Server", "Server process died, starting replacement...");
-		setTimeout(function () {
-			startPoolServer();
-		}, 2000);
-	});
-}
-
 // Functionality for Pool Workers
 function startPoolWorkers() {
+
+	// Check if No Configurations Exist
+	if (Object.keys(poolConfigs).length === 0) {
+		logger.warning("Master", "Workers", "No pool configs exist or are enabled in configs folder. No pools started.");
+		return;
+	}
+
 	// Check if Daemons Configured
-	var connection;
-	var redisConfig = portalConfig.redis;
+	//var connection;
+	//var redisConfig = portalConfig.redis;
 	Object.keys(poolConfigs).forEach(function (coin) {
 		var p = poolConfigs[coin];
 		if (!Array.isArray(p.daemons) || p.daemons.length < 1) {
 			logger.error("Master", coin, "No daemons configured so a pool cannot be started for this coin.");
 			delete poolConfigs[coin];
-		} else if (!connection) {
-			connection = getRedisClient(portalConfig);
-			connection.on("ready", function () {
-				logger.debug("Master", coin, `Processing setup with redis (${redisConfig.host}:${redisConfig.port})`);
-			});
 		}
+		//else if (!connection) {
+		//	connection = getRedisClient(portalConfig);
+		//	connection.on("ready", function () {
+		//		logger.debug("Master", coin, `Processing setup with Redis (${redisConfig.host}:${redisConfig.port})`);
+		//	});
+		//}
 	});
-
-	// Check if No Configurations Exist
-	if (Object.keys(poolConfigs).length === 0) {
-		logger.warning("Master", "Workers", "No pool configs exists or are enabled in configs folder. No pools started.");
-		return;
-	}
 
 	// Establish Forking/Clustering
 	var serializedConfigs = JSON.stringify(poolConfigs);
 	var numForks = (function () {
-		if (!portalConfig.clustering || !portalConfig.clustering.enabled) return 1;
-		if (portalConfig.clustering.forks === "auto") return os.cpus().length;
-		if (!portalConfig.clustering.forks || isNaN(portalConfig.clustering.forks)) return 1;
+		if (!portalConfig.clustering || !portalConfig.clustering.enabled) {
+			return 1;
+		}
+		if (portalConfig.clustering.forks === "auto") {
+			return os.cpus().length;
+		}
+		if (!portalConfig.clustering.forks || isNaN(portalConfig.clustering.forks)) {
+			return 1;
+		}
 		return portalConfig.clustering.forks;
 	})();
 
@@ -332,15 +290,13 @@ function startPoolWorkers() {
 			workerType: "worker",
 			forkId: forkId,
 			pools: serializedConfigs,
-			portalConfig: JSON.stringify(portalConfig),
+			portalConfig: JSON.stringify(portalConfig)
 		});
 		worker.forkId = forkId;
 		worker.type = "worker";
 		poolWorkers[forkId] = worker;
 
-		/* eslint-disable no-unused-vars */
-		worker
-			.on("exit", function (code, signal) {
+		worker.on("exit", function (code, signal) {
 				logger.error("Master", "Workers", `Fork ${forkId} died, starting replacement worker...`);
 				setTimeout(function () {
 					createPoolWorker(forkId);
@@ -371,15 +327,82 @@ function startPoolWorkers() {
 	}, 250);
 }
 
+// Functionality for Pool Payments
+function startPoolPayments() {
+	// Check if Pool Enabled Payments
+	var enabledForAny = false;
+	for (var pool in poolConfigs) {
+		var p = poolConfigs[pool];
+		var enabled = p.enabled && p.paymentProcessing && p.paymentProcessing.enabled;
+		if (enabled) {
+			enabledForAny = true;
+			break;
+		}
+	}
+
+	// Return if No One Needs Payments
+	if (!enabledForAny) return;
+
+	// Establish Pool Payments
+	var worker = cluster.fork({
+		workerType: "payments",
+		pools: JSON.stringify(poolConfigs),
+		portalConfig: JSON.stringify(portalConfig),
+	});
+	worker.on("exit", function (code, signal) {
+		logger.error("Master", "Payments", "Payment process died, starting replacement...");
+		setTimeout(function () {
+			startPoolPayments();
+		}, 2000);
+	});
+}
+
+function startPoolServer() {
+	var worker = cluster.fork({
+		workerType: "server",
+		pools: JSON.stringify(poolConfigs),
+		portalConfig: JSON.stringify(portalConfig),
+	});
+
+	worker.on("exit", function (code, signal) {
+		logger.error("Master", "Server", "Server process died, starting replacement...");
+		setTimeout(function () {
+			startPoolServer();
+		}, 2000);
+	});
+}
+
+
+/* Website front-end from original NOMP code
+
+var startPoolWebsite = function(){
+
+	if (!portalConfig.website.enabled) return;
+
+	var worker = cluster.fork({
+		workerType: "website",
+		pools: JSON.stringify(poolConfigs),
+		portalConfig: JSON.stringify(portalConfig)
+	});
+	worker.on("exit", function(code, signal){
+		logger.error("Master", "Website", "Website process died, spawning replacement...");
+		setTimeout(function(){
+			startWebsite(portalConfig, poolConfigs);
+		}, 2000);
+	});
+};
+
+*/
+
 // Initialize Server
 var PoolInit = (function () {
 	// Build Configurations
 	poolConfigs = buildPoolConfigs();
-	partnerConfigs = buildPartnerConfigs();
 
 	// Start Pool Workers
 	startPoolListener();
 	startPoolWorkers();
 	startPoolPayments();
 	startPoolServer();
+	//startPoolWebsite();
 })();

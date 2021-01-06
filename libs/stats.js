@@ -1,12 +1,12 @@
 /* PoolStats (Updated) */
 
 // Import Required Modules
-var redis = require("redis");
 var async = require("async");
+var Redis = require("redis");
 var RedisClustr = require("redis-clustr");
 
 // Import Stratum Algorithms
-var algorithms = require("blazepool-stratum-pool/scripts/algorithms.js");
+var Algorithms = require("blazepool-stratum-pool/scripts/algorithms.js");
 
 // Sort Object Properties Given Info
 /* eslint-disable no-prototype-builtins */
@@ -49,7 +49,7 @@ function getRedisClient(portalConfig) {
 					},
 				],
 				createClient: function (port, host, options) {
-					return redis.createClient({
+					return Redis.createClient({
 						port: port,
 						host: host,
 						password: options.password,
@@ -68,7 +68,7 @@ function getRedisClient(portalConfig) {
 					},
 				],
 				createClient: function (port, host) {
-					return redis.createClient({
+					return Redis.createClient({
 						port: port,
 						host: host,
 					});
@@ -77,13 +77,13 @@ function getRedisClient(portalConfig) {
 		}
 	} else {
 		if (redisConfig.password !== "") {
-			redisClient = redis.createClient({
+			redisClient = Redis.createClient({
 				port: redisConfig.port,
 				host: redisConfig.host,
 				password: redisConfig.password,
 			});
 		} else {
-			redisClient = redis.createClient({
+			redisClient = Redis.createClient({
 				port: redisConfig.port,
 				host: redisConfig.host,
 			});
@@ -366,8 +366,6 @@ var PoolStats = function (logger, poolConfigs, portalConfig) {
 							name: coinName,
 							symbol: poolConfigs[coinName].coin.symbol.toUpperCase(),
 							algorithm: poolConfigs[coinName].coin.algorithm,
-							logo: poolConfigs[coinName].logo,
-							featured: poolConfigs[coinName].featured,
 							fees: 0,
 							ports: poolConfigs[coinName].ports,
 							blocks: {
@@ -494,7 +492,7 @@ var PoolStats = function (logger, poolConfigs, portalConfig) {
 							}
 						}
 						for (var worker in coinStats.workers.workers) {
-							var shareMultiplier = Math.pow(2, 32) / algorithms[coinStats.algorithm].multiplier;
+							var shareMultiplier = Math.pow(2, 32) / Algorithms[coinStats.algorithm].multiplier;
 							var _workerRate = (shareMultiplier * coinStats.workers.workers[worker].validShares) / portalConfig.stats.hashrateWindow;
 							coinStats.workers.workers[worker].hashrate = _workerRate;
 							if (!coinStats.workers.workers[worker].soloMining) {

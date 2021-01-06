@@ -4,7 +4,7 @@
 var PoolStats = require("./stats.js");
 
 // Pool Stats Main Function
-var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
+var PoolAPI = function (logger, poolConfigs, portalConfig) {
 	// Establish API Variables
 	var portalStats = new PoolStats(logger, poolConfigs, portalConfig);
 	this.stats = portalStats;
@@ -251,7 +251,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
 				}
 
 			// Combined Endpoint (Done)
-			case "combined":
+			case "pools":
 				try {
 					// Check to Ensure URL is Formatted Properly
 					var urlQueries = req.query;
@@ -259,7 +259,6 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
 
 					// Define Individual Variables
 					var pools = {};
-					var partners = {};
 
 					// Get Pool Information
 					for (var pool in portalStats.stats) {
@@ -273,8 +272,6 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
 								pool: portalStats.stats[pool].name,
 								symbol: portalStats.stats[pool].symbol,
 								algorithm: portalStats.stats[pool].algorithm,
-								logo: portalStats.stats[pool].logo,
-								featured: portalStats.stats[pool].featured,
 								ports: portalStats.stats[pool].ports,
 								blocks: blocksData.blocks,
 								history: portalStats.stats[pool].history,
@@ -307,23 +304,11 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
 						}
 					}
 
-					// Get Partner Information
-					for (var partner in partnerConfigs) {
-						const currentPartner = partnerConfigs[partner];
-						partners[currentPartner.name] = currentPartner;
-					}
-
-					// Combine All Data
-					var combined = {
-						partners: partners,
-						pools: pools,
-					};
-
 					// Finalize Payload
 					var payload = {
-						endpoint: "combined",
+						endpoint: "pools",
 						errors: "",
-						data: combined,
+						data: pools,
 					};
 
 					// Finalize Endpoint Information
@@ -334,7 +319,7 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
 				} catch (e) {
 					// Finalize Payload
 					var payload = {
-						endpoint: "combined",
+						endpoint: "pools",
 						errors: messages.invalid,
 						data: {},
 					};
@@ -381,48 +366,6 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
 					// Finalize Payload
 					var payload = {
 						endpoint: "history",
-						errors: messages.invalid,
-						data: {},
-					};
-
-					// Finalize Endpoint Information
-					res.writeHead(400, { "Content-Type": "application/json" });
-					res.end(JSON.stringify(payload));
-
-					return;
-				}
-
-			// Partners Endpoint (Done)
-			case "partners":
-				try {
-					// Check to Ensure URL is Formatted Properly
-					var urlQueries = req.query;
-
-					// Define Individual Variables
-					var partners = {};
-
-					// Get Partner Information
-					for (var partner in partnerConfigs) {
-						const currentPartner = partnerConfigs[partner];
-						partners[currentPartner.name] = currentPartner;
-					}
-
-					// Finalize Payload
-					var payload = {
-						endpoint: "partners",
-						errors: "",
-						data: partners,
-					};
-
-					// Finalize Endpoint Information
-					res.writeHead(200, { "Content-Type": "application/json" });
-					res.end(JSON.stringify(payload));
-
-					return;
-				} catch (e) {
-					// Finalize Payload
-					var payload = {
-						endpoint: "partners",
 						errors: messages.invalid,
 						data: {},
 					};
@@ -504,8 +447,6 @@ var PoolAPI = function (logger, partnerConfigs, poolConfigs, portalConfig) {
 								pool: portalStats.stats[pool].name,
 								symbol: portalStats.stats[pool].symbol,
 								algorithm: portalStats.stats[pool].algorithm,
-								logo: portalStats.stats[pool].logo,
-								featured: portalStats.stats[pool].featured,
 								ports: portalStats.stats[pool].ports,
 								statistics: {
 									hashrateType: portalStats.stats[pool].statistics.hashrateType,

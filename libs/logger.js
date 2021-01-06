@@ -1,7 +1,6 @@
 /* PoolLogger (Updated) */
 
 // Import Required Modules
-/* eslint-disable no-unused-vars */
 var dateFormat = require("dateformat");
 var colors = require("colors");
 
@@ -10,7 +9,7 @@ var severityValues = {
 	debug: 1,
 	warning: 2,
 	error: 3,
-	special: 4,
+	special: 4
 };
 
 // Indicate Severity By Colors
@@ -31,10 +30,10 @@ var severityColors = function (severity, text) {
 };
 
 // Pool Logger Main Function
-var PoolLogger = function (configuration) {
+var PoolLogger = function (portalConfig) {
 	// Establish Initial Severity
-	var logLevelInt = severityValues[configuration.logLevel];
-	var logColors = configuration.logColors;
+	var logLevelInt = severityValues[portalConfig.logLevel];
+	var logColors = portalConfig.logColors;
 
 	// Establish Log Main Functon
 	var log = function (severity, system, component, text, subcat) {
@@ -68,7 +67,6 @@ var PoolLogger = function (configuration) {
 			}
 			logString += text;
 		}
-
 		// Print Formatted Logger Message
 		console.log(logString);
 	};

@@ -3,17 +3,15 @@
 // Import Required Modules
 var fs = require("fs");
 var async = require("async");
-var util = require("blazepool-stratum-pool/scripts/util.js");
-var redis = require("redis");
+var Redis = require("redis");
 var RedisClustr = require("redis-clustr");
-
-// Import Stratum Module
 var Stratum = require("blazepool-stratum-pool");
+var Util = require("blazepool-stratum-pool/scripts/util.js");
 
 // Derive Main Address from Given
 function getProperAddress(poolOptions, address) {
 	if (address.length === 40) {
-		return util.addressFromEx(poolOptions.addresses.address, address);
+		return Util.addressFromEx(poolOptions.addresses.address, address);
 	}
 	return address;
 }
@@ -32,7 +30,7 @@ function getRedisClient(portalConfig) {
 					},
 				],
 				createClient: function (port, host, options) {
-					return redis.createClient({
+					return Redis.createClient({
 						port: port,
 						host: host,
 						password: options.password,
@@ -51,7 +49,7 @@ function getRedisClient(portalConfig) {
 					},
 				],
 				createClient: function (port, host) {
-					return redis.createClient({
+					return Redis.createClient({
 						port: port,
 						host: host,
 					});
@@ -60,13 +58,13 @@ function getRedisClient(portalConfig) {
 		}
 	} else {
 		if (redisConfig.password !== "") {
-			redisClient = redis.createClient({
+			redisClient = Redis.createClient({
 				port: redisConfig.port,
 				host: redisConfig.host,
 				password: redisConfig.password,
 			});
 		} else {
-			redisClient = redis.createClient({
+			redisClient = Redis.createClient({
 				port: redisConfig.port,
 				host: redisConfig.host,
 			});
@@ -76,34 +74,32 @@ function getRedisClient(portalConfig) {
 }
 
 // Setup Payments for Individual Pools
-/* eslint no-unused-vars: ["error", {"args": "none"}] */
-/* eslint-disable no-useless-catch, no-prototype-builtins */
 function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
 	// Establish Payment Variables
 	var coin = poolOptions.coin.name;
-	var processingConfig = poolOptions.paymentProcessing;
+	var paymentConfig = poolOptions.paymentProcessing;
 	var logSystem = "Payments";
 	var logComponent = coin;
 
-	// Optional Payment Variables
-	var opidCount = 0;
-	var opids = [];
-
-	// Mandatory Payment Variables
-	var requireShielding = poolOptions.coin.requireShielding === true;
-	var fee = parseFloat(poolOptions.coin.txfee) || parseFloat(0.0004);
-	var minConfPayout = Math.max(processingConfig.minConf || 10, 1);
-	if (minConfPayout < 3) {
-		logger.warning(logSystem, logComponent, `${logComponent} minConf of 3 is recommended.`);
-	}
-
 	// Load Coin Daemon from Config
-	var daemon = new Stratum.daemon.interface([processingConfig.daemon], function (severity, message) {
+	var daemon = new Stratum.daemon.interface([paymentConfig.daemon], function (severity, message) {
 		logger[severity](logSystem, logComponent, message);
 	});
 
 	// Establish Redis Client
 	var redisClient = getRedisClient(portalConfig);
+
+	// Mandatory Payment Variables
+	var requireShielding = poolOptions.coin.requireShielding === true;
+	var fee = parseFloat(poolOptions.coin.txfee) || parseFloat(0.0004);
+	var minConfPayout = Math.max(paymentConfig.minConf || 10, 1);
+	if (minConfPayout < 3) {
+		logger.warning(logSystem, logComponent, `${logComponent} minConf of 3 is recommended.`);
+	}
+
+	// Optional Payment Variables
+	var opidCount = 0;
+	var opids = [];
 
 	// Establsh Helper Variables
 	var magnitude;
@@ -183,11 +179,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
 						true
 					);
 				} else {
-					logger.debug(
-						logSystem,
-						logComponent,
-						`Pool address: ${address} verified!`
-					);
+					logger.debug(logSystem, logComponent, `Pool address: ${address} verified!`);
 					callback();
 				}
 			},
@@ -208,7 +200,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
 				try {
 					var d = result.data.split('result":')[1].split(",")[0].split(".")[1];
 					magnitude = parseInt(`10${new Array(d.length).join("0")}`);
-					minPaymentSatoshis = parseInt(processingConfig.minimumPayment * magnitude);
+					minPaymentSatoshis = parseInt(paymentConfig.minimumPayment * magnitude);
 					coinPrecision = magnitude.toString().length - 1;
 					callback();
 				} catch (e) {
@@ -294,7 +286,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
 			return;
 		}
 		var amount = satoshisToCoins(balance - 10000);
-		var params = [poolOptions.addresses.address, [{address: poolOptions.addresses.zAddress, amount: amount}]];
+		var params = [poolOptions.addresses.address, [{ address: poolOptions.addresses.zAddress, amount: amount }]];
 		daemon.cmd("z_sendmany", params, function (result) {
 			if (!result || result.error || result[0].error) {
 				logger.error(logSystem, logComponent, `Error with RPC call z_sendmany ${JSON.stringify(result[0].error)}`);
@@ -332,7 +324,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
 		if (amount > 100.0) {
 			amount = 100.0;
 		}
-		var params = [poolOptions.addresses.zAddress, [{address: poolOptions.addresses.tAddress, amount: amount}]];
+		var params = [poolOptions.addresses.zAddress, [{ address: poolOptions.addresses.tAddress, amount: amount }]];
 		daemon.cmd("z_sendmany", params, function (result) {
 			if (!result || result.error || result[0].error) {
 				logger.error(logSystem, logComponent, `Error with RPC call z_sendmany ${JSON.stringify(result[0].error)}`);
@@ -354,7 +346,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
 	function verifyOperations(ops) {
 		var batchRPCCommand = [];
 		if (ops.length === 0 && opidCount !== 0) {
-			opicCount = 0;
+			opidCount = 0;
 			opids = [];
 			logger.warning(logSystem, logComponent, "Clearing operation ids due to empty result set.");
 		}
@@ -471,7 +463,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
 				} catch (e) {
 					throw e;
 				}
-			}, processingConfig.checkInterval * 1000);
+			}, paymentConfig.checkInterval * 1000);
 
 			// Process Operation Checks
 			if (poolOptions.operationInterval) {
@@ -481,7 +473,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
 					} catch (e) {
 						throw e;
 					}
-				}, processingConfig.operationInterval * 1000);
+				}, paymentConfig.operationInterval * 1000);
 			}
 
 			// Process Main Payment
@@ -492,7 +484,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
 				} catch (e) {
 					throw e;
 				}
-			}, processingConfig.paymentInterval * 1000);
+			}, paymentConfig.paymentInterval * 1000);
 
 			// Process Shielding Checks
 			if (requireShielding) {
@@ -512,7 +504,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
 					} catch (e) {
 						throw e;
 					}
-				}, processingConfig.shieldInterval * 1000);
+				}, paymentConfig.shieldInterval * 1000);
 			}
 
 			// Finalize Setup
@@ -1349,7 +1341,7 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
 						logger.error(
 							logSystem,
 							logComponent,
-							`Payments sent but could not update redis. ${JSON.stringify(error)}
+							`Payments sent but could not update Redis. ${JSON.stringify(error)}
                             Disabling payment processing to prevent possible double-payouts. The redis commands
                             in ${coin}_finalRedisCommands.txt must be ran manually`
 						);
@@ -1431,13 +1423,15 @@ function SetupForPool(logger, poolOptions, portalConfig, setupFinished) {
 var PoolPayments = function (logger) {
 	// Load Useful Data from Process
 	var poolConfigs = JSON.parse(process.env.pools);
-	var portalConfig = JSON.parse(process.env.portalConfig);
+	var portalConfig = JSON.parse(process.env.portalConfig); //Why do we need portalConfig?
 	var enabledPools = [];
 
 	// Push Individual Configs to Main Array
 	Object.keys(poolConfigs).forEach(function (coin) {
 		var poolOptions = poolConfigs[coin];
-		if (poolOptions.paymentProcessing && poolOptions.paymentProcessing.enabled) enabledPools.push(coin);
+		if (poolOptions.paymentProcessing && poolOptions.paymentProcessing.enabled) {
+			enabledPools.push(coin);
+		}
 	});
 
 	// Load Payments for Individual Pools
@@ -1452,7 +1446,7 @@ var PoolPayments = function (logger) {
 			coins.forEach(function (coin) {
 				// Establish Payment Variables
 				var poolOptions = poolConfigs[coin];
-				var processingConfig = poolOptions.paymentProcessing;
+				var paymentConfig = poolOptions.paymentProcessing;
 				var logSystem = "Payments";
 				var logComponent = coin;
 
@@ -1460,7 +1454,7 @@ var PoolPayments = function (logger) {
 				logger.debug(
 					logSystem,
 					logComponent,
-					`Payment processing setup to run every ${processingConfig.paymentInterval} second(s) with daemon (${processingConfig.daemon.user}@${processingConfig.daemon.host}:${processingConfig.daemon.port}) and Redis (${portalConfig.redis.host}:${portalConfig.redis.port})`
+					`Payment processing setup to run every ${paymentConfig.paymentInterval} second(s) with daemon (${paymentConfig.daemon.user}@${paymentConfig.daemon.host}:${paymentConfig.daemon.port}) and Redis (${portalConfig.redis.host}:${portalConfig.redis.port})`
 				);
 			});
 		}
