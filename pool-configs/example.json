@@ -100,12 +100,15 @@
 	},
 	"ports": {
 		"2222": {
+			"enabled": true,
 			"diff": 0.01
 		},
 		"3333": {
+			"enabled": true,
 			"diff": 2
 		},
 		"9999": {
+			"enabled": true,
 			"diff": 0.5,
 			"varDiff": {
 				"minDiff": 0.01,
