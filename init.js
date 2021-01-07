@@ -35,16 +35,21 @@ if (!fs.existsSync("config.json")) {
 // Establish Pool Variables
 var poolConfigs;
 var portalConfig = JSON.parse(JSON.minify(fs.readFileSync("config.json", {encoding: "utf8"})));
+var logger = new PoolLogger({
+	"logLevel": portalConfig.logLevel,
+	"logColors": portalConfig.logColors
+});
+
 // Check for POSIX Installation
 try {
 	var posix = require("posix");
 	try {
 		posix.setrlimit("nofile", {soft: 100000, hard: 100000});
-		PoolLogger.debug("POSIX", "Connection Limit", `Raised to 100K concurrent connections, now running as non-root user: ${process.getuid()}`);
+		logger.debug("POSIX", "Connection Limit", `Raised to 100K concurrent connections, now running as non-root user: ${process.getuid()}`);
 	}
 	catch (e) {
 		if (cluster.isMaster) {
-			PoolLogger.warning("POSIX", "Connection Limit", "(Safe to ignore) Must be ran as root to increase resource limits");
+			logger.warning("POSIX", "Connection Limit", "(Safe to ignore) Must be ran as root to increase resource limits");
 		}
 	}
 	finally {
@@ -53,13 +58,13 @@ try {
 		if (uid) {
 			// Set our server's uid to that user
 			process.setuid(uid);
-			PoolLogger.debug("POSIX", "Connection Limit", `Raised to 100K concurrent connections, now running as non-root user: ${process.getuid()}`);
+			logger.debug("POSIX", "Connection Limit", `Raised to 100K concurrent connections, now running as non-root user: ${process.getuid()}`);
 		}
 	}
 }
 catch (e) {
 	if (cluster.isMaster)
-		PoolLogger.debug("POSIX", "Connection Limit", "(Safe to ignore) POSIX module not installed and resource (connection) limit was not raised");
+		logger.debug("POSIX", "Connection Limit", "(Safe to ignore) POSIX module not installed and resource (connection) limit was not raised");
 }
 
 // Establish Pool Worker Cases
@@ -161,7 +166,7 @@ function buildPoolConfigs() {
 			var portsF = Object.keys(poolConfigFiles[f].ports);
 			for (var g = 0; g < portsF.length; g++) {
 				if (ports.indexOf(portsF[g]) !== -1) {
-					PoolLogger.error("Master", poolConfigFiles[f].fileName, `Has same configured port of ${portsF[g]} as ${poolConfigFiles[i].fileName}`);
+					logger.error("Master", poolConfigFiles[f].fileName, `Has same configured port of ${portsF[g]} as ${poolConfigFiles[i].fileName}`);
 					process.exit(1);
 					return;
 				}
@@ -201,7 +206,7 @@ function buildPoolConfigs() {
 
 		// Check to Ensure Algorithm is Supported
 		if (!(poolOptions.coin.algorithm in Algorithms)) {
-			PoolLogger.error("Master", poolOptions.coin.name, `Cannot run a pool for unsupported algorithm "${poolOptions.coin.algorithm}"`);
+			logger.error("Master", poolOptions.coin.name, `Cannot run a pool for unsupported algorithm "${poolOptions.coin.algorithm}"`);
 			delete configs[poolOptions.coin.name];
 		}
 	});
@@ -216,7 +221,7 @@ function startPoolListener() {
 
 	// Establish Listener Log
 	listener.on("log", function (text) {
-			PoolLogger.debug("Master", "CLI", text);
+			logger.debug("Master", "CLI", text);
 
 			// Establish Listener Commands
 		})
@@ -247,7 +252,7 @@ function startPoolWorkers() {
 
 	// Check if No Configurations Exist
 	if (Object.keys(poolConfigs).length === 0) {
-		PoolLogger.warning("Master", "Workers", "No pool configs exist or are enabled in configs folder. No pools started.");
+		logger.warning("Master", "Workers", "No pool configs exist or are enabled in configs folder. No pools started.");
 		return;
 	}
 
@@ -257,13 +262,13 @@ function startPoolWorkers() {
 	Object.keys(poolConfigs).forEach(function (coin) {
 		var p = poolConfigs[coin];
 		if (!Array.isArray(p.daemons) || p.daemons.length < 1) {
-			PoolLogger.error("Master", coin, "No daemons configured so a pool cannot be started for this coin.");
+			logger.error("Master", coin, "No daemons configured so a pool cannot be started for this coin.");
 			delete poolConfigs[coin];
 		}
 		//else if (!connection) {
 		//	connection = getRedisClient(portalConfig);
 		//	connection.on("ready", function () {
-		//		PoolLogger.debug("Master", coin, `Processing setup with Redis (${redisConfig.host}:${redisConfig.port})`);
+		//		logger.debug("Master", coin, `Processing setup with Redis (${redisConfig.host}:${redisConfig.port})`);
 		//	});
 		//}
 	});
@@ -297,7 +302,7 @@ function startPoolWorkers() {
 		poolWorkers[forkId] = worker;
 
 		worker.on("exit", function (code, signal) {
-				PoolLogger.error("Master", "Workers", `Fork ${forkId} died, starting replacement worker...`);
+				logger.error("Master", "Workers", `Fork ${forkId} died, starting replacement worker...`);
 				setTimeout(function () {
 					createPoolWorker(forkId);
 				}, 2000);
@@ -322,7 +327,7 @@ function startPoolWorkers() {
 		i++;
 		if (i === numForks) {
 			clearInterval(startInterval);
-			PoolLogger.debug("Master", "Workers", `Started ${Object.keys(poolConfigs).length} pool(s) on ${numForks} thread(s)`);
+			logger.debug("Master", "Workers", `Started ${Object.keys(poolConfigs).length} pool(s) on ${numForks} thread(s)`);
 		}
 	}, 250);
 }
@@ -350,7 +355,7 @@ function startPoolPayments() {
 		portalConfig: JSON.stringify(portalConfig),
 	});
 	worker.on("exit", function (code, signal) {
-		PoolLogger.error("Master", "Payments", "Payment process died, starting replacement...");
+		logger.error("Master", "Payments", "Payment process died, starting replacement...");
 		setTimeout(function () {
 			startPoolPayments();
 		}, 2000);
@@ -365,7 +370,7 @@ function startPoolServer() {
 	});
 
 	worker.on("exit", function (code, signal) {
-		PoolLogger.error("Master", "Server", "Server process died, starting replacement...");
+		logger.error("Master", "Server", "Server process died, starting replacement...");
 		setTimeout(function () {
 			startPoolServer();
 		}, 2000);
@@ -385,7 +390,7 @@ var startPoolWebsite = function(){
 		portalConfig: JSON.stringify(portalConfig)
 	});
 	worker.on("exit", function(code, signal){
-		PoolLogger.error("Master", "Website", "Website process died, spawning replacement...");
+		logger.error("Master", "Website", "Website process died, spawning replacement...");
 		setTimeout(function(){
 			startWebsite(portalConfig, poolConfigs);
 		}, 2000);
