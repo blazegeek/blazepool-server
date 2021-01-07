@@ -6,7 +6,7 @@ var async = require("async");
 var Redis = require("redis");
 var RedisClustr = require("redis-clustr");
 var Stratum = require("blazepool-stratum-pool");
-var Util = require("blazepool-stratum-pool/scripts/util.js");
+var Util = require("blazepool-stratum-pool/libs/util.js");
 
 // Derive Main Address from Given
 function getProperAddress(poolOptions, address) {
