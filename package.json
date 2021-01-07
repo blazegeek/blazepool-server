@@ -18,7 +18,7 @@
 		"url": "https://github.com/blazegeek/blazepool-server.git"
 	},
 	"scripts": {
-		"start": "nodemon scripts/init.js"
+		"start": "nodemon libs/init.js"
 	},
 	"dependencies": {
 		"apicache": "^1.5.3",
