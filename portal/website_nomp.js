@@ -7,8 +7,8 @@ var dot = require("dot");
 var express = require("express");
 var bodyParser = require("body-parser");
 var compress = require("compression");
-var Stratum = require("blazepool-stratum-pool");
-var Util = require("blazepool-stratum-pool/libs/util.js");
+var Stratum = require("../stratum/stratum.js");
+var Util = require("../stratum/util.js");
 var api = require("./api.js");
 
 module.exports = function(logger){

@@ -6,7 +6,7 @@ var Redis = require("redis");
 var RedisClustr = require("redis-clustr");
 
 // Import Stratum Algorithms
-var Algorithms = require("blazepool-stratum-pool/libs/algorithms.js");
+var Algorithms = require("../stratum/algorithms.js");
 
 // Sort Object Properties Given Info
 /* eslint-disable no-prototype-builtins */

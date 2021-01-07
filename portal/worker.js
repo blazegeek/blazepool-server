@@ -6,7 +6,7 @@ var RedisClustr = require("redis-clustr");
 
 // Import Stratum/PoolShares Modules
 var PoolShares = require("./shares.js");
-var Stratum = require("blazepool-stratum-pool");
+var Stratum = require("../stratum/stratum.js");
 
 // Generate Redis Client
 function getRedisClient(portalConfig) {

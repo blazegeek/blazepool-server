@@ -13,15 +13,15 @@ var Redis = require("redis");
 var RedisClustr = require("redis-clustr");
 
 // Import Pool Functionality
-var PoolListener = require("./libs/listener.js");
-var PoolLogger = require("./libs/logger.js");
-var PoolPayments = require("./libs/payments.js");
-var PoolServer = require("./libs/server.js"); // API server
-var PoolWorker = require("./libs/worker.js");
-//var PoolWebsite = require("./libs/website.js"); // Front-end
+var PoolListener = require("./portal/listener.js");
+var PoolLogger = require("./portal/logger.js");
+var PoolPayments = require("./portal/payments.js");
+var PoolServer = require("./portal/server.js"); // API server
+var PoolWorker = require("./portal/worker.js");
+//var PoolWebsite = require("./portal/website.js"); // Front-end
 
 // Import Stratum Algorithms
-var Algorithms = require("blazepool-stratum-pool/libs/algorithms.js");
+var Algorithms = require("./stratum/algorithms.js");
 
 // Import JSON Functionality
 JSON.minify = JSON.minify || require("node-json-minify");

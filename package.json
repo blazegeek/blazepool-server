@@ -18,7 +18,7 @@
 		"url": "https://github.com/blazegeek/blazepool-server.git"
 	},
 	"scripts": {
-		"start": "nodemon libs/init.js"
+		"start": "nodemon init.js"
 	},
 	"dependencies": {
 		"apicache": "^1.5.3",
@@ -41,8 +41,7 @@
 		"nonce": "*",
 		"redis": "^3.0.2",
 		"redis-clustr": "^1.7.0",
-		"request": "2.88.2",
-		"blazepool-stratum-pool": "git://github.com/blazegeek/blazepool-stratum-pool.git#dev"
+		"request": "2.88.2"
 	},
 	"engines": {
 		"node": ">=0.10"
